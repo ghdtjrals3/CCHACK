@@ -11,7 +11,7 @@ Spring 3.x부터 자바8 지원불가 정책에 따라 자바 17 기반 실습 �
 1. Spring Boot Frameworks 이해를 위해 공지사항만 구현
 
 ## 주요 적용 프레임워크
-* Spring Boot Frameworks, Spring Data JPA, QueryDSL
+* Spring Boot Frameworks
 
 ## 학과 수업에 대한 궁금증은 학과 오픈채팅방에 문의
 * https://open.kakao.com/o/gEd0JIad
