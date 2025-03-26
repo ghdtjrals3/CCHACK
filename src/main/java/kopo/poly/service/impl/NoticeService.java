@@ -1,7 +1,7 @@
 package kopo.poly.service.impl;
 
 import kopo.poly.dto.NoticeDTO;
-import kopo.poly.persistance.mapper.INoticeMapper;
+import kopo.poly.mapper.INoticeMapper;
 import kopo.poly.service.INoticeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
