@@ -93,7 +93,7 @@ public class NoticeController {
 
         // 함수 처리가 끝나고 보여줄 JSP 파일명
         // webapp/WEB-INF/views/notice/noticeReg.jsp
-        return "notice/noticeReg";
+        return "notice/noticeReg1";
     }
 
     /**
