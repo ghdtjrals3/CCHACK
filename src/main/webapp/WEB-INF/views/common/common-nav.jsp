@@ -58,7 +58,7 @@
             <a href="<c:url value='/search'/>" class="<%= "search".equals(currentTab) ? "active" : "" %>">검색</a>
             <a href="<c:url value='/alerts'/>" class="<%= "alerts".equals(currentTab) ? "active" : "" %>">알림</a>
             <% if (user_id.isEmpty()) { %>
-            <a href="<c:url value=''/>" class="<%= "login".equals(currentTab) ? "active" : "" %> js-login-open">로그인</a>
+            <a href="<c:url value='/user/login'/>" class="<%= "login".equals(currentTab) ? "active" : "" %> js-login-open">로그인</a>
             <% } else { %>
             <a href="<c:url value='/user/myPage'/>"    class="<%= "me".equals(currentTab)    ? "active" : "" %>">내 정보</a>
             <% } %>
