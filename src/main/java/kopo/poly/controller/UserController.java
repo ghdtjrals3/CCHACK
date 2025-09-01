@@ -2,9 +2,8 @@ package kopo.poly.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import kopo.poly.dto.MsgDTO;
-import kopo.poly.dto.NoticeDTO;
-import kopo.poly.service.INoticeService;
+import kopo.poly.dto.UserDTO;
+import kopo.poly.service.IUserService;
 import kopo.poly.util.CmmUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,10 +13,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 
 /*
@@ -35,7 +30,7 @@ import java.util.Optional;
 public class UserController {
 
     // @RequiredArgsConstructor 를 통해 메모리에 올라간 서비스 객체를 Controller에서 사용할 수 있게 주입함
-    private final INoticeService noticeService;
+    private final IUserService userService;
 
     /**
      * 게시판 리스트 보여주기
@@ -46,8 +41,112 @@ public class UserController {
     public String login(HttpSession session, ModelMap model) throws Exception {
         // 로그 찍기(추후 찍은 로그를 통해 이 함수에 접근했는지 파악하기 용이하다.)
         log.info(this.getClass().getName() + ".login Start!");
+
+
         log.info(this.getClass().getName() + ".login End!");
         return "user/login";
 
+    }
+
+    //로그인 처리
+    @PostMapping(value = "loginProc")
+    @ResponseBody
+    public String loginProc(HttpSession session, ModelMap model, HttpServletRequest request) throws Exception {
+        log.info(this.getClass().getName() + ".loginProc Start!");
+
+        String user_id = CmmUtil.nvl(request.getParameter("user_id"));
+        String user_pwd = CmmUtil.nvl(request.getParameter("user_pwd"));
+
+        UserDTO uDTO = new UserDTO();
+
+        uDTO.setUser_id(user_id);
+        uDTO.setUser_pwd(user_pwd);
+
+        String result = userService.loginProc(uDTO);
+
+        session.setAttribute("user_id", user_id);
+
+        log.info(this.getClass().getName() + ".loginProc End!");
+        return result;
+    }
+
+    //회원가입처리
+    @PostMapping(value = "signUpProc")
+    @ResponseBody
+    public String signUpProc(HttpSession session, ModelMap model, HttpServletRequest request) throws Exception {
+        log.info(this.getClass().getName() + ".signUpProc Start!");
+
+        String user_id = CmmUtil.nvl(request.getParameter("user_id")); // 유저 아이디
+        String user_pwd = CmmUtil.nvl(request.getParameter("user_pwd")); // 유저 패스워드
+        String user_nick_name = CmmUtil.nvl(request.getParameter("user_nick_name")); // 유저 닉네임
+        // 교통 습관
+        Boolean commute_by_car = Boolean.valueOf(request.getParameter("commute_by_car")); // 출퇴근 시 자차 이용 여부(예/아니요)
+        // 소비 습관
+        String cafe_use_freq = CmmUtil.nvl(request.getParameter("cafe_use_freq")); // 카페 이용 빈도 (거의 안 감/ 주1~2회/ 등)
+        String grocery_freq = CmmUtil.nvl(request.getParameter("grocery_freq")); // 장보기 빈도 (거의 안 감 / 주1회)
+        // 에너지 습관
+        Boolean practice_energy_saving = Boolean.valueOf(request.getParameter("practice_energy_saving")); // 에너지 절약 실천 여부
+        // 생활 지역
+        String residence_dong = CmmUtil.nvl(request.getParameter("residence_dong")); // 거주 행정동
+        String workplace_or_school_dong = CmmUtil.nvl(request.getParameter("workplace_or_school_dong")); // 직장/ 학교 행정동
+
+
+
+        UserDTO uDTO = new UserDTO();
+        uDTO.setUser_id(user_id);
+        uDTO.setUser_pwd(user_pwd);
+        uDTO.setUser_nick_name(user_nick_name);
+        uDTO.setCommute_by_car(commute_by_car);
+        uDTO.setCafe_use_freq(cafe_use_freq);
+        uDTO.setGrocery_freq(grocery_freq);
+        uDTO.setPractice_energy_saving(practice_energy_saving);
+        uDTO.setResidence_dong(residence_dong);
+        uDTO.setWorkplace_or_school_dong(workplace_or_school_dong);
+
+
+        int result = userService.signUpProc(uDTO);
+        String msg;
+
+        if(result == 0){
+            msg = "fail";
+            log.info(this.getClass().getName() + "signUpProc Fail!");
+        } else {
+            msg = "success";
+            log.info(this.getClass().getName() + "signUpProc Success!");
+        }
+
+
+        log.info(this.getClass().getName() + ".signUpProc End!");
+        // 추후에 있을 페이지 반환
+        return msg;
+    }
+
+    //중복 아이디 체크를 위한 조회
+    @GetMapping(value = "checkId")
+    @ResponseBody
+    public String checkId(HttpSession session, ModelMap model, HttpServletRequest request) throws Exception {
+        log.info(this.getClass().getName() + "checkId Start!");
+
+        String user_id = CmmUtil.nvl(request.getParameter("user_id"));
+
+        UserDTO uDTO = new UserDTO();
+        uDTO.setUser_id(user_id);
+
+        int result = userService.checkId(uDTO);
+        String msg = "";
+
+        if(result == 0){
+            msg = "available";
+        } else  if(result == 1){
+            msg = "unavailable";
+        }
+
+        log.info(this.getClass().getName() + "checkId End!");
+        return msg;
+    }
+
+    @GetMapping(value = "myPage")
+    public String myPage(HttpSession session, ModelMap model, HttpServletRequest request) throws Exception {
+        return "user/myPage";
     }
 }

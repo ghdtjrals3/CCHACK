@@ -2,7 +2,48 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <!-- JAVA와 연결할 Mapper 파일 설정 -->
-<mapper namespace="kopo.poly.mapper.INoticeMapper">
+<mapper namespace="kopo.poly.mapper.IUserMapper">
+
+    <resultMap id="UserMap" type="kopo.poly.dto.UserDTO">
+        <id     property="user_id"  column="user_id"/>
+        <result property="user_pwd" column="user_pwd"/>
+        <result property="user_nick_name" column="user_nick_name"/>
+        <result property="commute_by_car" column="commute_by_car"/>
+        <result property="cafe_use_freq" column="cafe_use_freq"/>
+        <result property="grocery_freq" column="grocery_freq"/>
+        <result property="practice_energy_saving" column="practice_energy_saving"/>
+        <result property="residence_dong" column="residence_dong"/>
+        <result property="workplace_or_school_dong" column="workplace_or_school_dong"/>
+    </resultMap>
+
+
+    <!-- 회원가입을 위한 중복 아이디 확인-->
+    <select id="checkId" parameterType="UserDTO" resultType="int">
+        SELECT count(*)
+        FROM users
+        WHERE user_id = #{user_id}
+    </select>
+
+    <!-- 회원가입 정보 넣기 -->
+    <insert id="signUpProc" parameterType="UserDTO">
+        INSERT INTO users
+        (
+            user_id, user_pwd, user_nick_name, commute_by_car, cafe_use_freq,
+            grocery_freq, practice_energy_saving, residence_dong, workplace_or_school_dong
+        )
+        VALUES(
+                  #{user_id}, #{user_pwd}, #{user_nick_name}, #{commute_by_car}, #{cafe_use_freq},
+                  #{grocery_freq}, #{practice_energy_saving}, #{residence_dong}, #{workplace_or_school_dong}
+              )
+    </insert>
+
+    <select id="loginProc" parameterType="UserDTO" resultMap="UserMap">
+        SELECT *
+        FROM users
+        WHERE user_id = #{user_id} AND user_pwd = #{user_pwd}
+    </select>
+
+
 
 	<!-- 게시판 리스트 쿼리 -->
 	<select id="getNoticeList" resultType="NoticeDTO">

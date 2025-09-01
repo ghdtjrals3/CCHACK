@@ -58,9 +58,9 @@
             <a href="<c:url value='/search'/>" class="<%= "search".equals(currentTab) ? "active" : "" %>">검색</a>
             <a href="<c:url value='/alerts'/>" class="<%= "alerts".equals(currentTab) ? "active" : "" %>">알림</a>
             <% if (user_id.isEmpty()) { %>
-            <a href="<c:url value='/user/login'/>" class="<%= "login".equals(currentTab) ? "active" : "" %> js-login-open">로그인</a>
+            <a href="<c:url value=''/>" class="<%= "login".equals(currentTab) ? "active" : "" %> js-login-open">로그인</a>
             <% } else { %>
-            <a href="<c:url value='/me'/>"    class="<%= "me".equals(currentTab)    ? "active" : "" %>">내 정보</a>
+            <a href="<c:url value='/user/myPage'/>"    class="<%= "me".equals(currentTab)    ? "active" : "" %>">내 정보</a>
             <% } %>
         </nav>
     </div>
@@ -141,7 +141,7 @@
         openLinks.forEach(a => {
             a.addEventListener('click', function(e){
                 e.preventDefault();
-                const url = a.getAttribute('href') || '/login';
+                const url = a.getAttribute('href') || '/user/login';
                 openModal(url);
             });
         });
@@ -156,4 +156,40 @@
             if (e.key === 'Escape' && modal.style.display === 'block') closeModal();
         });
     })();
+</script>
+<script>
+</script>
+<script>
+    function openLoginModal() {
+        const modal = document.getElementById('modal-login');
+        const frame = document.getElementById('modal-login-iframe');
+
+        // 로그인 페이지를 iframe에 로드 (경로는 실제 매핑에 맞추세요)
+        if (!frame.src || frame.src.endsWith('about:blank')) {
+            frame.src = '<c:url value="/login"/>'; // 예: /login 또는 /user/login 등
+        }
+        modal.style.display = 'block';
+    }
+
+    function closeLoginModal() {
+        const modal = document.getElementById('modal-login');
+        modal.style.display = 'none';
+        // 선택: 다음에 열 때 초기화하고 싶으면 iframe src 리셋
+        // document.getElementById('modal-login-iframe').src = 'about:blank';
+    }
+
+    // 열기 버튼 연결 (네비의 로그인 버튼이 .js-login-open 라고 가정)
+    document.addEventListener('DOMContentLoaded', function () {
+        const openBtn = document.querySelector('.js-login-open');
+        if (openBtn) {
+            openBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                openLoginModal();
+            });
+        }
+        const closeBtn = document.querySelector('#modal-login .modal-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeLoginModal);
+        }
+    });
 </script>

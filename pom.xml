@@ -79,6 +79,12 @@
             <artifactId>tomcat-embed-jasper</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.7</version>
+        </dependency>
+
         <!-- JSTL API (jakarta) -->
         <dependency>
             <groupId>jakarta.servlet.jsp.jstl</groupId>

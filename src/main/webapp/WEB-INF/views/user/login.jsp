@@ -31,40 +31,118 @@
 						</button>
 					</div>
 					<div id="loginPage">
-						<form action="/user/loginProc.do" method="post">
+                        <form id="loginForm">
 							<div class="form-group">
-								<label for="email">아이디</label> <input name="id" id="id"
+								<label for="email">아이디</label> <input name="user_id" id="user_id"
 									class="form-control" placeholder="enter your ID">
 							</div>
 							<div class="form-group mb-4">
 								<label for="password">비밀번호</label> <input type="password"
-									name="pwd" id="pwd" class="form-control"
+									name="user_pwd" id="user_pwd" class="form-control"
 									placeholder="enter your passsword">
 							</div>
-							<input name="login" class="btn btn-block login-btn" type="submit"
-								value="Login">
-						</form>
+							<input name="login" class="btn btn-block login-btn" type="button"
+								value="Login" onclick="loginProc();">
+                        </form>
 					</div>
 
 					<div id="signupPage" style="display: none">
 						<div class="form-group">
-							<label for="name">이름</label> <input name="signupName"
-								id="signupName" class="form-control" placeholder="your name">
-						</div>
-						<div class="form-group">
 							<label for="email">아이디</label> <input name="signupId"
-								id="signupId" class="form-control" placeholder="enter your ID">
+								id="user_signup_id" class="form-control" placeholder="enter your ID">
+                            <div class="input-group">
+                                <button type="button" id="btnCheckId" class="btn btn-outline-secondary" onclick="checkId();">중복확인</button>
+                            </div>
+
+                            <small id="idHelp" class="form-text"></small>
+                            <!-- 중복확인 완료 여부를 보관하는 hidden 필드 -->
+                            <input type="hidden" id="idChecked" value="false">
+
+
 						</div>
 						<div class="form-group mb-4">
 							<label for="password">비밀번호</label> <input type="password"
-								name="signupPwd" id="signupPwd" class="form-control"
+								name="signupPwd" id="user_signup_pwd" class="form-control"
 								placeholder="enter your passsword">
 						</div>
 						<div class="form-group mb-4">
 							<label for="password">비밀번호 재확인</label> <input type="password"
-								name="checkPwd" id="checkPwd" class="form-control"
+								name="checkPwd" id="user_signup_checkpwd" class="form-control"
 								placeholder="check your passsword">
 						</div>
+
+                        <hr class="my-4">
+
+                        <!-- 추가: 유저 닉네임 -->
+                        <div class="form-group">
+                            <label for="user_nick_name">닉네임</label>
+                            <input name="user_nick_name" id="user_nick_name" class="form-control" placeholder="예: 그린워커">
+                        </div>
+
+                        <!-- 추가: 교통 습관 (자차 출퇴근 여부) -->
+                        <div class="form-group">
+                            <label class="d-block">출퇴근 시 자차 이용 여부</label>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="commute_by_car" id="commute_by_car_yes" value="true">
+                                <label class="form-check-label" for="commute_by_car_yes">예</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="commute_by_car" id="commute_by_car_no" value="false" checked>
+                                <label class="form-check-label" for="commute_by_car_no">아니오</label>
+                            </div>
+                        </div>
+
+                        <!-- 추가: 소비 습관 - 카페 이용 빈도 -->
+                        <div class="form-group">
+                            <label for="cafe_use_freq">카페 이용 빈도</label>
+                            <select name="cafe_use_freq" id="cafe_use_freq" class="form-control">
+                                <option value="" selected disabled>선택하세요</option>
+                                <option value="거의 안 감">거의 안 감</option>
+                                <option value="월1~2회">월 1~2회</option>
+                                <option value="주1~2회">주 1~2회</option>
+                                <option value="주3회 이상">주 3회 이상</option>
+                            </select>
+                        </div>
+
+                        <!-- 추가: 소비 습관 - 장보기 빈도 -->
+                        <div class="form-group">
+                            <label for="grocery_freq">장보기 빈도</label>
+                            <select name="grocery_freq" id="grocery_freq" class="form-control">
+                                <option value="" selected disabled>선택하세요</option>
+                                <option value="거의 안 감">거의 안 감</option>
+                                <option value="월1회">월 1회</option>
+                                <option value="주1회">주 1회</option>
+                                <option value="주2회 이상">주 2회 이상</option>
+                            </select>
+                        </div>
+
+                        <!-- 추가: 에너지 절약 실천 여부 -->
+                        <div class="form-group">
+                            <label class="d-block">에너지 절약 실천 여부</label>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="practice_energy_saving" id="practice_energy_saving_yes" value="true">
+                                <label class="form-check-label" for="practice_energy_saving_yes">예</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="practice_energy_saving" id="practice_energy_saving_no" value="false" checked>
+                                <label class="form-check-label" for="practice_energy_saving_no">아니오</label>
+                            </div>
+                        </div>
+
+                        <!-- 추가: 생활 지역 - 거주 행정동 -->
+                        <div class="form-group">
+                            <label for="residence_dong">거주 행정동</label>
+                            <input name="residence_dong" id="residence_dong" class="form-control" placeholder="예: 효자동">
+                        </div>
+
+                        <!-- 추가: 생활 지역 - 직장/학교 행정동 -->
+                        <div class="form-group">
+                            <label for="workplace_or_school_dong">직장/학교 행정동</label>
+                            <input name="workplace_or_school_dong" id="workplace_or_school_dong" class="form-control" placeholder="예: 석사동">
+                        </div>
+
+
+
 						<input name="login" class="btn btn-block login-btn" type="button"
 							value="SignUp" onclick="signupProc()">
 					</div>
@@ -106,44 +184,153 @@
 			button_b.disabled = true;
 		}
 	</script>
+    <script>
+        function loginProc() {
+
+            var user_id = document.getElementById("user_id").value;
+            var user_pwd =document.getElementById("user_pwd").value;
+
+            $.ajax({
+                url: "/user/loginProc",
+                type: "POST",
+                data: {"user_id": user_id, "user_pwd": user_pwd},
+                success: function (result) {
+                    if(result === "success"){
+                        if (window.parent && window.parent.closeLoginModal) {
+                            window.parent.closeLoginModal();
+                            window.parent.location.reload();
+                        }
+                    } else {
+                        alert("로그인 실패");
+                    }
+                },
+                error: function (e) {
+                    alert('이미 존재하는 아이디입니다.');
+                }
+            });
+        }
+    </script>
+    <script>
+        function checkId() {
+            console.log('gello')
+
+            let user_id = document.getElementById('user_signup_id').value;
+            $.ajax({
+                url: "/user/checkId",
+                type: "GET",
+                data: { user_id: user_id },
+                dataType: "text",
+                success: function(res) {
+                    const txt = $.trim(res);
+                    if (txt === "available") {
+                        alert("사용 가능한 아이디입니다.");
+                        document.getElementById("idChecked").value = "true";   // ★ 여기서 true로 세팅
+                    } else {
+                        alert("이미 존재하는 아이디입니다.");
+                        document.getElementById("idChecked").value = "false";
+                    }
+                },
+                error: function() {
+                    alert("아이디 확인 중 오류 발생");
+                    document.getElementById("idChecked").value = "false";
+                }
+            });
+        }
+
+    </script>
 	<script>
 	function signupProc() { 
-		let user_id = document.getElementById('signupId').value;
-		let user_pwd = document.getElementById('signupPwd').value;
-		let user_checkPwd = document.getElementById('checkPwd').value;
-		let user_name = document.getElementById('signupName').value;
-		
+		let user_id = document.getElementById('user_signup_id').value;
+		let user_pwd = document.getElementById('user_signup_pwd').value;
+		let user_checkPwd = document.getElementById('user_signup_checkpwd').value;
+		let user_nick_name = document.getElementById('user_nick_name').value;
+        let commute_by_car = document.querySelector('input[name="commute_by_car"]:checked').value;
+        let cafe_use_freq = document.getElementById("cafe_use_freq").value;
+        let grocery_freq = document.getElementById("grocery_freq").value;
+        // 에너지 습관
+        let practice_energy_saving = document.querySelector('input[name="practice_energy_saving"]:checked').value;
+        // 생활 지역
+        let residence_dong = document.getElementById("residence_dong").value;
+        let workplace_or_school_dong = document.getElementById("workplace_or_school_dong").value;
+
 		console.log(user_pwd);
 		console.log(user_checkPwd);
-		
-		if(user_name.trim() == '') {
-			alert('이름을 입력해주세요');
-			return false;
-		}else if(user_pwd.trim() == '') {
-			alert('비밀번호를 입력해주세요');
-			return false;
-		}else if(user_id.trim() == '') {
-			alert('아이디를 입력해주세요');
-			return false;
-		}
-		
-		if(user_pwd != user_checkPwd) {
-			alert('비밀번호가 일치하지 않습니다.');
-			return false;
-		}
-		
-		$.ajax({
-			url: "/user/signupProc.do",
-			type: "POST",
-			data: {"user_id":user_id,"user_pwd":user_pwd,"user_name":user_name}, 
-			success:function(result) {
-				doSwal('관리자 승인 후 완료됩니다!', '', 'success');
-				setTimeout("location.reload()", 3000);
-			},
-			error:function(e) {
-				alert('이미 존재하는 아이디입니다.');
-			}
-		});
+
+        if (document.getElementById("idChecked").value !== "true") {
+            alert("아이디 중복확인을 해주세요.");
+            document.getElementById("user_signup_id").focus();
+            return false;
+        }
+
+
+        // ===== 빈칸 처리 =====
+        if (user_nick_name.trim() === '') {
+            alert('닉네임을 입력해주세요');
+            return false;
+        } else if (user_id.trim() === '') {
+            alert('아이디를 입력해주세요');
+            return false;
+        } else if (user_pwd.trim() === '') {
+            alert('비밀번호를 입력해주세요');
+            return false;
+        } else if (user_checkPwd.trim() === '') {
+            alert('비밀번호 재확인을 입력해주세요');
+            return false;
+        } else if (user_pwd !== user_checkPwd) {
+            alert('비밀번호가 일치하지 않습니다.');
+            return false;
+        } else if (!commute_by_car) {
+            alert('출퇴근 시 자차 이용 여부를 선택해주세요');
+            return false;
+        } else if (cafe_use_freq.trim() === '') {
+            alert('카페 이용 빈도를 선택해주세요');
+            return false;
+        } else if (grocery_freq.trim() === '') {
+            alert('장보기 빈도를 선택해주세요');
+            return false;
+        } else if (!practice_energy_saving) {
+            alert('에너지 절약 실천 여부를 선택해주세요');
+            return false;
+        } else if (residence_dong.trim() === '') {
+            alert('거주 행정동을 입력해주세요');
+            return false;
+        } else if (workplace_or_school_dong.trim() === '') {
+            alert('직장/학교 행정동을 입력해주세요');
+            return false;
+        }
+
+
+
+
+        $.ajax({
+            url: "/user/signUpProc",
+            type: "POST",
+            data: {
+                "user_id": user_id,
+                "user_pwd": user_pwd,
+                "user_nick_name": user_nick_name,
+                "commute_by_car": commute_by_car,
+                "cafe_use_freq": cafe_use_freq,
+                "grocery_freq": grocery_freq,
+                "practice_energy_saving": practice_energy_saving,
+                "residence_dong": residence_dong,
+                "workplace_or_school_dong": workplace_or_school_dong
+            },
+            success: function(result) {
+                if (result === "success") {
+                    if (window.parent && window.parent.closeLoginModal) {
+                        window.parent.closeLoginModal();
+                        window.parent.location.reload();
+                    }
+                } else {
+                    alert("회원가입 실패: " + result);
+                }
+            },
+            error: function(xhr) {
+                console.error("회원가입 에러:", xhr);
+                alert("이미 존재하는 아이디입니다.");
+            }
+        });
 	}
 	</script>
 </body>
