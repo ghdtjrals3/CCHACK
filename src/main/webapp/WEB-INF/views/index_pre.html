@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>동구라미 온 • 앱/웹 반응형 (최신 bnb 톤)</title>
+<style>
+/* ========= Design tokens ========= */
+:root{
+  --ink:#222; --muted:#717171; --line:#e5e7eb; --bg:#f7f7f8; --card:#fff;
+  --accent:#ff385c; --brand:#2563eb;
+  --r-lg:22px; --r-md:16px; --r-sm:12px;
+  --pill-shadow:0 10px 25px rgba(0,0,0,.08);
+  --max-app:420px;       /* 앱 모드 최대 폭 */
+  --max-web:1100px;      /* 웹 모드 컨테이너 폭 */
+}
+
+/* ========= Global reset / guards ========= */
+*{box-sizing:border-box}
+html,body{height:100%}
+html,body{margin:0; color:var(--ink); background:var(--bg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR","Malgun Gothic",Arial,sans-serif; overflow-x:hidden;}
+img{max-width:100%; display:block}
+a{text-decoration:none}
+
+/* 두 모드 컨테이너 */
+.app-mode,.web-mode{display:none}
+
+/* ===================== 앱 모드 (≤ 640px) ===================== */
+@media (max-width:640px){
+  .app-mode{display:flex; min-height:100%; width:100%}
+}
+
+.phone{max-width:var(--max-app); margin:0 auto; min-height:100%; width:100%; background:var(--bg); position:relative}
+.appbar{position:sticky; top:0; z-index:30; background:linear-gradient(180deg,#fff,rgba(255,255,255,.92)); backdrop-filter:blur(6px); border-bottom:1px solid var(--line)}
+.appbar .row{display:flex; align-items:center; justify-content:space-between; padding:10px 14px}
+.brand{font-weight:800; color:var(--brand)}
+.menu a{margin:0 8px; color:#111; font-size:14px}
+.login a{color:var(--muted); font-size:14px}
+
+.search-wrap{padding:12px 14px 6px; background:#fff}
+.search-pill{display:flex; align-items:center; gap:12px; border:1px solid var(--line); border-radius:999px; padding:14px 18px; background:#fff; box-shadow:var(--pill-shadow)}
+.search-ico{width:20px; height:20px; position:relative}
+.search-ico:before,.search-ico:after{content:""; position:absolute; border-radius:999px}
+.search-ico:before{width:13px; height:13px; border:2px solid #444; top:1px; left:1px; opacity:.7}
+.search-ico:after{width:9px; height:2px; background:#444; transform:rotate(45deg); right:-1px; bottom:0; opacity:.7}
+.search-main{font-weight:700}
+.search-sub{font-size:12px; color:var(--muted)}
+.search-filter{margin-left:auto; display:grid; place-items:center; width:32px; height:32px; border:1px solid var(--line); border-radius:999px}
+
+.cats{display:flex; gap:22px; padding:12px 14px; background:#fff; overflow-x:auto; border-bottom:1px solid var(--line);
+  overscroll-behavior-x:contain; -webkit-overflow-scrolling:touch}
+.cat{display:flex; flex-direction:column; align-items:center; min-width:70px; gap:6px; color:#777; font-size:12px}
+.cat .emoji{font-size:22px}
+.cat .new{margin-left:6px; font-size:10px; color:#fff; background:linear-gradient(180deg,#5c7cff,#3455ff); padding:3px 6px; border-radius:999px}
+.cat.active{color:#111}
+.bar{height:2px; width:56px; background:transparent}
+.cat.active .bar{background:#111; border-radius:2px}
+
+.app-main{padding:10px 14px; padding-bottom:calc(110px + env(safe-area-inset-bottom))}
+.card{background:var(--card); border:1px solid var(--line); border-radius:var(--r-md); box-shadow:0 2px 8px rgba(0,0,0,.04); margin:12px 0; overflow:visible; contain:paint}
+.card-h{display:flex; align-items:center; gap:12px; padding:14px}
+.icon{width:42px; height:42px; border-radius:14px; display:grid; place-items:center; font-size:18px; background:#f5f5f5}
+.meta{flex:1}
+.title{font-weight:700}
+.muted{color:var(--muted); font-size:13px; margin-top:4px}
+.right-link{color:#6b6fe0; font-size:13px}
+
+.info{background:#fff; border:1px solid var(--line); border-radius:var(--r-lg); padding:14px; margin:10px 0; box-shadow:var(--pill-shadow); overflow:visible; contain:paint}
+.info .loc{font-weight:700; margin-bottom:8px}
+.info .cols{display:grid; grid-template-columns:repeat(4,1fr); gap:8px}
+.info .k{font-size:12px; color:var(--muted)}
+.info .v{font-weight:800; text-align:center}
+
+.banners{display:flex; gap:14px; overflow-x:auto; padding:6px 2px 2px; overscroll-behavior-x:contain; -webkit-overflow-scrolling:touch}
+.banner{flex:0 0 clamp(260px, 84%, 380px); border:1px solid var(--line); border-radius:var(--r-lg); padding:16px; background:#fff; box-shadow:var(--pill-shadow); contain:paint}
+.banner h4{margin:0 0 6px}
+
+.section-title{font-size:18px; font-weight:800; margin:12px 0 8px}
+.tile-row{padding:12px 14px}
+
+/* 앱 하단 탭바 */
+.bottom{position:fixed; left:50%; transform:translateX(-50%); bottom:0; width:100%; max-width:var(--max-app);
+  background:rgba(255,255,255,.96); border-top:1px solid var(--line); backdrop-filter:blur(8px); z-index:40; padding-bottom:env(safe-area-inset-bottom)}
+.tabs{display:grid; grid-template-columns:repeat(5,1fr)}
+.tab{display:flex; flex-direction:column; align-items:center; gap:4px; padding:10px 0; font-size:11px; color:#7a7a7a}
+.tab.active{color:var(--accent)}
+.ico24{width:22px; height:22px; opacity:.9}
+
+/* ===================== 웹 모드 (≥ 768px) ===================== */
+@media (min-width:768px){
+  .web-mode{display:block}
+  .web-header{position:sticky; top:0; z-index:20; background:#fff; border-bottom:1px solid var(--line)}
+  .web-header .row{display:flex; align-items:center; justify-content:space-between; gap:12px; max-width:var(--max-web); margin:0 auto; padding:14px 16px}
+  .web-brand{color:var(--brand); font-weight:800}
+  .web-nav a{margin:0 12px; color:#111}
+  .web-login{color:var(--muted)}
+
+  .hero{text-align:center; padding:48px 16px 72px; background:linear-gradient(180deg,#eef2ff,#fff)}
+  .hero h1{font-size:28px; margin:0 0 6px}
+  .hero p{color:var(--muted); margin:0}
+
+  .web-container{max-width:var(--max-web); margin:0 auto; padding:0 16px 40px; overflow:hidden}
+
+  /* 카드 영역: auto-fit + minmax로 잘림 방지 */
+  .web-cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); /* ★ 핵심 */
+    gap:16px;
+    transform:translateY(-36px);  /* 겹치는 느낌만 주되 잘림 없음 */
+    margin-bottom:8px;
+  }
+  .wcard{background:#fff; border:1px solid var(--line); border-radius:16px; box-shadow:0 6px 20px rgba(0,0,0,.06); padding:16px; min-height:84px; contain:paint}
+
+  .info-wide{margin:16px 0; background:#fff; border:1px solid var(--line); border-radius:16px; padding:16px; box-shadow:0 6px 20px rgba(0,0,0,.06); contain:paint}
+  .info-wide .cols{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:8px}
+  .k{font-size:12px; color:var(--muted)} .v{font-weight:800; text-align:center}
+
+  .web-banners{display:flex; gap:16px; overflow-x:auto; padding:8px 0; overscroll-behavior-x:contain; -webkit-overflow-scrolling:touch}
+  .web-banner{flex:0 0 clamp(280px, 33%, 360px); background:#fff; border:1px solid var(--line); border-radius:16px; padding:16px; box-shadow:0 6px 20px rgba(0,0,0,.06); contain:paint}
+
+  .web-sect{margin:24px 0}
+  .list{background:#fff; border:1px solid var(--line); border-radius:16px; overflow:hidden}
+  .item{padding:12px 16px; border-top:1px solid var(--line)}
+  .item:first-child{border-top:none}
+}
+
+/* 웹 모드일 때 앱 모드 숨김 */
+/* 잘림 해결 패치: 히어로 아래 카드 그리드 겹침 제거 */
+@media (min-width: 768px){
+  .web-container{
+    overflow: visible;                 /* 숨김 해제 */
+  }
+  .web-cards{
+    transform: none;                   /* 올려놓던 변환 제거 */
+    margin-top: 16px;                  /* 자연스러운 여백만 */
+    /* 필요시 그림자 살리려면 겹치기 대신 여백으로 충분 */
+  }
+  .hero{
+    overflow: visible;                 /* 혹시 모를 잘림 방지 */
+    padding-bottom: 40px;              /* 카드와 간격 확보 */
+  }
+}
+
+</style>
+</head>
+<body>
+
+<!-- =================== 앱 모드 (좁은 창) =================== -->
+<section class="app-mode">
+  <div class="phone">
+    <div class="appbar">
+      <div class="row">
+        <div class="brand">동구라미 온</div>
+        <div class="menu"><a href="#">지도</a><a href="#">참여</a><a href="#">센터</a><a href="#">정보</a></div>
+        <div class="login"><a href="#">로그인</a></div>
+      </div>
+      <div class="search-wrap">
+        <div class="search-pill">
+          <div class="search-ico"></div>
+          <div>
+            <div class="search-main">검색을 시작해 보세요</div>
+            <div class="search-sub">내 주변 · 오늘 · 참여자 선택</div>
+          </div>
+          <div class="search-filter">
+            <svg class="ico24" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M7 12h10M10 18h4" stroke="#222" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="cats">
+        <div class="cat active"><div class="emoji">🏠</div><div>숙소</div><div class="bar"></div></div>
+        <div class="cat"><div class="emoji">🎈</div><div>체험 <span class="new">NEW</span></div><div class="bar"></div></div>
+        <div class="cat"><div class="emoji">🛎️</div><div>서비스 <span class="new">NEW</span></div><div class="bar"></div></div>
+      </div>
+    </div>
+
+    <main class="app-main">
+      <article class="card"><div class="card-h"><div class="icon">💰</div><div class="meta"><div class="title">포인트 현황</div><div class="muted">로그인을 진행해주세요.</div></div><a class="right-link" href="#">로그인</a></div></article>
+      <article class="card"><div class="card-h"><div class="icon">🚨</div><div class="meta"><div class="title">쓰레기 신고 · 해결</div><div class="muted">8건이 기다리고 있어요. 참여하면 포인트도 모아봐요!</div></div><a class="right-link" href="#">해결하기 ›</a></div></article>
+      <article class="card"><div class="card-h"><div class="icon">🗑️</div><div class="meta"><div class="title">스마트 배출함</div><div class="muted">우유팩 수거기 · 01번 배출함</div></div><a class="right-link" href="#">더보기 ›</a></div></article>
+      <article class="card"><div class="card-h"><div class="icon">🏪</div><div class="meta"><div class="title">동구라미가게</div><div class="muted">친환경자원순환센터, 동구문화센터</div></div><a class="right-link" href="#">더보기 ›</a></div></article>
+
+      <article class="info">
+        <div class="loc">광주 동구 필문대로 159번길 17</div>
+        <div class="cols">
+          <div><div class="k">종량제</div><div class="v">-</div></div>
+          <div><div class="k">재활용</div><div class="v">-</div></div>
+          <div><div class="k">음식물</div><div class="v">-</div></div>
+          <div><div class="k">기타</div><div class="v">-</div></div>
+        </div>
+      </article>
+
+      <div class="banners">
+        <div class="banner"><h4>탑밥 프로그램</h4><p>지구시민을 위한 탄소저감 프로그램!</p></div>
+        <div class="banner"><h4>다회용기 대여</h4><p>일회용 대신 다회용!</p></div>
+        <div class="banner"><h4>동구라미온 2.0 출시</h4><p>앱으로 더 간편하게!</p></div>
+      </div>
+
+      <div class="section-title">공지사항</div>
+      <article class="card">
+        <div class="tile-row">다회용기 대여 역사 종합 안내 (10.1~10.24)</div>
+        <div class="tile-row">재활용동네마당 지도 · 우유팩 수거기 안내</div>
+        <div class="tile-row">최신 이슈 동구리미 2.0 앱 홍보 중</div>
+      </article>
+
+      <div class="section-title">센터소식</div>
+      <article class="card">
+        <div class="tile-row">2025 자원순환의 날 기념 세미나 개최</div>
+        <div class="tile-row">일회용 컵 줄이기 우수사례</div>
+        <div class="tile-row">참여자 모집 안내</div>
+      </article>
+    </main>
+
+    <footer class="bottom">
+      <nav class="tabs">
+        <a class="tab active" href="#"><svg class="ico24" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M16.5 16.5 20 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>검색</span></a>
+        <a class="tab" href="#"><svg class="ico24" viewBox="0 0 24 24" fill="none"><path d="M6 10c0-3 2.4-5 6-5s6 2 6 5c0 5-6 9-6 9s-6-4-6-9z" stroke="currentColor" stroke-width="1.8"/></svg><span>위시리스트</span></a>
+        <a class="tab" href="#"><svg class="ico24" viewBox="0 0 24 24" fill="none"><path d="M5 19h14l-2-10H7L5 19zM9 9V6h6v3" stroke="currentColor" stroke-width="1.8"/></svg><span>여행</span></a>
+        <a class="tab" href="#"><svg class="ico24" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M8 9h8M8 13h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>메시지</span></a>
+        <a class="tab" href="#"><svg class="ico24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.2" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c2.2-3.8 13.8-3.8 16 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>프로필</span></a>
+      </nav>
+    </footer>
+  </div>
+</section>
+
+<!-- =================== 웹 모드 (넓은 창) =================== -->
+<section class="web-mode">
+  <header class="web-header">
+    <div class="row">
+      <div class="web-brand">동구라미 온</div>
+      <nav class="web-nav"><a href="#">지도</a><a href="#">참여</a><a href="#">센터</a><a href="#">정보</a></nav>
+      <a class="web-login" href="#">로그인</a>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>광주 동구처럼, ‘동구라미 온’!</h1>
+    <p>탄소중립 생활실천은 나부터 먼저</p>
+  </section>
+
+  <div class="web-container">
+    <!-- 히어로 아래 카드들(자연 반응형, 잘림 없음) -->
+    <div class="web-cards">
+      <div class="wcard"><strong>포인트 현황</strong><br><span class="muted">로그인을 진행해주세요.</span></div>
+      <div class="wcard"><strong>쓰레기 신고 · 해결</strong><br><span class="muted">8건이 기다리고 있어요.</span></div>
+      <div class="wcard"><strong>스마트 배출함</strong><br><span class="muted">우유팩 수거기 · 01번 배출함</span></div>
+      <div class="wcard"><strong>동구라미가게</strong><br><span class="muted">친환경자원순환센터, 동구문화센터</span></div>
+    </div>
+
+    <div class="info-wide">
+      <strong>청소차 도착정보</strong>
+      <div class="muted">광주 동구 필문대로 159번길 17</div>
+      <div class="cols">
+        <div><div class="k">종량제</div><div class="v">-</div></div>
+        <div><div class="k">재활용</div><div class="v">-</div></div>
+        <div><div class="k">음식물</div><div class="v">-</div></div>
+        <div><div class="k">기타</div><div class="v">-</div></div>
+      </div>
+    </div>
+
+    <div class="web-banners">
+      <div class="web-banner"><strong>탑밥 프로그램</strong><p class="muted">지구시민을 위한 탄소저감 프로그램!</p></div>
+      <div class="web-banner"><strong>다회용기 대여</strong><p class="muted">일회용 대신 다회용!</p></div>
+      <div class="web-banner"><strong>동구라미온 2.0 출시</strong><p class="muted">앱으로 더 간편하게!</p></div>
+    </div>
+
+    <div class="web-sect">
+      <h3>공지사항</h3>
+      <div class="list">
+        <div class="item">다회용기 대여 역사 종합 안내 (10.1~10.24)</div>
+        <div class="item">재활용동네마당 지도 · 우유팩 수거기 안내</div>
+        <div class="item">최신 이슈 동구리미 2.0 앱 홍보 중</div>
+      </div>
+    </div>
+
+    <div class="web-sect">
+      <h3>센터소식</h3>
+      <div class="list">
+        <div class="item">2025 자원순환의 날 기념 세미나 개최</div>
+        <div class="item">일회용 컵 줄이기 우수사례</div>
+        <div class="item">참여자 모집 안내</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

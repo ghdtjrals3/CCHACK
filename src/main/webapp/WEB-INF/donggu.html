@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>동구라미 온</title>
+  <style>
+    :root{
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --text:#1c1d21;
+      --muted:#6b7280;
+      --primary:#5b6bff;
+      --accent:#8ab6ff;
+      --success:#22c55e;
+      --warning:#f59e0b;
+      --danger:#ef4444;
+      --shadow:0 6px 16px rgba(20,30,60,.08);
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", Arial, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      color:var(--text);
+      background:var(--bg);
+    }
+
+    /* app container - mobile width */
+    .app{
+      max-width:420px;
+      margin:0 auto;
+      min-height:100%;
+      display:flex;
+      flex-direction:column;
+    }
+
+    /* header */
+    .header{
+      position:sticky; top:0; z-index:10;
+      background:#fff;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 16px;
+      border-bottom:1px solid #eef0f6;
+    }
+    .brand{
+      display:flex; align-items:center; gap:8px; font-weight:800; letter-spacing:-.5px;
+    }
+    .brand .logo{
+      width:24px; height:24px; border-radius:6px;
+      background:linear-gradient(135deg, var(--primary), var(--accent));
+      box-shadow:0 3px 10px rgba(91,107,255,.35);
+    }
+    .brand .text{font-size:20px}
+    .hamburger{
+      width:32px; height:32px; border-radius:8px; border:1px solid #eef0f6; background:#fff;
+      display:grid; place-items:center; cursor:pointer;
+    }
+    .hamburger span, .hamburger span:before, .hamburger span:after{
+      content:""; display:block; width:16px; height:2px; background:#111; border-radius:2px;
+    }
+    .hamburger span:before{transform:translateY(-5px)}
+    .hamburger span:after{transform:translateY(3px)}
+
+    /* drawer */
+    .drawer{
+      position:fixed; inset:0; display:none;
+    }
+    .drawer.open{display:block}
+    .drawer .backdrop{position:absolute; inset:0; background:rgba(0,0,0,.28)}
+    .drawer .panel{
+      position:absolute; top:0; right:0; width:72%; max-width:300px; height:100%;
+      background:#fff; padding:20px;
+      box-shadow:-10px 0 24px rgba(0,0,0,.08);
+      animation:slideIn .2s ease;
+    }
+    @keyframes slideIn{from{transform:translateX(20px); opacity:.6} to{transform:none; opacity:1}}
+
+    /* banner */
+    .banner{
+      margin:12px 16px 4px;
+      overflow:hidden; border-radius:14px; background:#fff; box-shadow:var(--shadow);
+    }
+    .slides{display:flex; transition:transform .5s ease}
+    .slide{
+      min-width:100%;
+      background: linear-gradient(180deg,#f8fbff,#ffffff);
+      padding:16px;
+      display:flex; align-items:center; gap:12px;
+    }
+    .slide .badge{
+      font-size:12px; background:#eef5ff; color:#3b82f6; padding:6px 10px; border-radius:999px; display:inline-block;
+      margin-bottom:4px;
+    }
+    .slide h3{margin:6px 0 4px; font-size:16px}
+    .slide p{margin:0; color:var(--muted); font-size:13px}
+    .slide .emoji{font-size:26px}
+
+    /* cards */
+    .content{padding:8px 16px 96px}
+    .card{
+      background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
+      padding:14px 14px; margin:12px 0;
+    }
+    .card .row{display:flex; align-items:flex-start; justify-content:space-between; gap:10px}
+    .card .title{font-weight:700}
+    .card .link{font-size:13px; color:#6b6fe0; text-decoration:none}
+    .card .muted{color:var(--muted); font-size:14px; margin-top:6px}
+    .pill{font-size:12px; padding:4px 8px; border-radius:999px; background:#f3f4f7; color:#374151; margin-left:6px}
+    .pill.ok{background:#ecfdf5; color:#15803d}
+    .pill.warn{background:#fff7ed; color:#b45309}
+    .pill.danger{background:#fef2f2; color:#b91c1c}
+    .icon{
+      width:34px; height:34px; border-radius:50%; display:grid; place-items:center;
+      background:#f1f5ff;
+    }
+
+    /* info box */
+    .info{
+      border:1px solid #e5e7ef; border-radius:14px; padding:12px; background:#fff; margin-top:6px;
+    }
+    .info .loc{display:flex; align-items:center; gap:8px; font-size:14px}
+    .info .loc .pin{width:14px; height:14px; border-radius:50%; background:#ff6b6b}
+    .info .cols{display:grid; grid-template-columns: repeat(4,1fr); gap:8px; margin-top:8px}
+    .info .cols .k{font-size:12px; color:var(--muted)}
+    .info .cols .v{font-weight:700}
+
+    /* two-up buttons */
+    .twoup{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:10px}
+    .panel{
+      border-radius:14px; padding:14px; box-shadow:var(--shadow); color:#0f172a;
+    }
+    .panel.green{background:#eaffef}
+    .panel.blue{background:#eef6ff}
+    .panel h4{margin:0 0 6px}
+    .panel p{margin:0 0 10px; color:#4b5563; font-size:13px}
+    .panel .btn{
+      display:inline-block; background:#fff; padding:8px 14px; border-radius:999px; text-decoration:none;
+      border:1px solid #e5e7eb; font-weight:600; font-size:13px;
+    }
+
+    /* bottom nav */
+    .bottom{
+      position:fixed; left:50%; transform:translateX(-50%);
+      bottom:0; width:100%; max-width:420px; padding:12px 16px 18px; background:linear-gradient(180deg, rgba(245,247,251,0), rgba(245,247,251,1) 36px);
+    }
+    .nav{
+      background:#fff; border-radius:22px; box-shadow:0 12px 30px rgba(20,30,60,.12);
+      display:grid; grid-template-columns:repeat(4,1fr); align-items:center; padding:10px 12px; position:relative;
+    }
+    .nav .item{
+      display:flex; flex-direction:column; align-items:center; gap:4px; font-size:12px; color:#6b7280; text-decoration:none;
+    }
+    .nav .item.active{color:#111}
+    .home-fab{
+      position:absolute; left:50%; transform:translateX(-50%) translateY(-38%);
+      width:64px; height:64px; border-radius:50%; background:#fff;
+      display:grid; place-items:center; box-shadow:0 10px 24px rgba(91,107,255,.35), inset 0 0 0 6px #f0f3ff;
+    }
+    .home-fab .dot{
+      width:26px; height:26px; border-radius:50%;
+      background:linear-gradient(135deg,var(--primary),var(--accent));
+      box-shadow:0 6px 14px rgba(91,107,255,.45);
+    }
+
+    /* helpers */
+    .sep{height:6px}
+    .flex{display:flex; align-items:center; gap:8px}
+    .right{margin-left:auto}
+    .small{font-size:12px; color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="app">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div class="text">동구라미 온</div>
+      </div>
+      <button class="hamburger" id="btnMenu" aria-label="메뉴 열기">
+        <span></span>
+      </button>
+    </header>
+
+    <!-- Drawer -->
+    <div class="drawer" id="drawer">
+      <div class="backdrop" id="backdrop"></div>
+      <aside class="panel">
+        <h3 style="margin:0 0 12px">메뉴</h3>
+        <nav style="display:grid; gap:10px">
+          <a href="#" class="small">마이페이지</a>
+          <a href="#" class="small">포인트 내역</a>
+          <a href="#" class="small">공지사항</a>
+          <a href="#" class="small">설정</a>
+        </nav>
+      </aside>
+    </div>
+
+    <!-- Banner (carousel) -->
+    <section class="banner" aria-label="배너">
+      <div class="slides" id="slides">
+        <div class="slide">
+          <div style="flex:1">
+            <span class="badge">축제, 행사, 모임에서 일회용이 고민이라면?</span>
+            <h3>일회용 대신 다회용! [다회용기 대여]</h3>
+            <p>#환경 #분리배출 #우유팩수거기 #북구물품대여</p>
+          </div>
+          <div class="emoji" aria-hidden="true">😊</div>
+        </div>
+        <div class="slide">
+          <div style="flex:1">
+            <span class="badge">참여하면 포인트가 쌓여요!</span>
+            <h3>쓰레기 신고·해결에 동참하세요</h3>
+            <p>사진 인증하고 보상도 받아요</p>
+          </div>
+          <div class="emoji" aria-hidden="true">♻️</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Content -->
+    <main class="content">
+
+      <!-- 포인트 현황 -->
+      <article class="card">
+        <div class="row">
+          <div class="flex">
+            <div class="icon">💰</div>
+            <div class="title">포인트 현황</div>
+          </div>
+          <a class="link" href="#">로그인</a>
+        </div>
+        <div class="muted">로그인을 진행해주세요.</div>
+      </article>
+
+      <!-- 쓰레기 신고/해결 -->
+      <article class="card">
+        <div class="row">
+          <div class="flex">
+            <div class="icon" style="background:#fff1f2">🚨</div>
+            <div class="title">쓰레기 신고 · 해결</div>
+          </div>
+          <a class="link" href="#">해결하기 ›</a>
+        </div>
+        <div class="muted"><span class="pill danger">8건 대기</span> 참여하면 포인트도 모아봐요!</div>
+      </article>
+
+      <!-- 스마트 배출함 -->
+      <article class="card">
+        <div class="row">
+          <div class="title">스마트 배출함</div>
+          <a class="link" href="#">더보기 ›</a>
+        </div>
+        <div class="sep"></div>
+        <div class="flex small">
+          🗑 친환경자원순환센터 우유팩수거기
+          <span class="pill ok right">여유</span>
+        </div>
+        <div class="flex small" style="margin-top:6px">
+          🗑 친환경자원순환센터 01
+          <span class="pill ok right">여유</span>
+        </div>
+      </article>
+
+      <!-- 동구라미 가게 -->
+      <article class="card">
+        <div class="row">
+          <div class="title">동구라미가게</div>
+          <a class="link" href="#">더보기 ›</a>
+        </div>
+        <div class="sep"></div>
+        <div class="flex small">
+          친환경자원순환센터
+          <span class="pill warn right">달랭</span>
+        </div>
+        <div class="flex small" style="margin-top:6px">
+          동구문화센터
+          <span class="pill warn right">달랭</span>
+        </div>
+      </article>
+
+      <!-- 청소차 도착정보 -->
+      <article class="info">
+        <div class="loc"><span class="pin" aria-hidden="true"></span> 광주 동구 필문대로 159번길 17</div>
+        <div class="cols">
+          <div>
+            <div class="k">종량제</div>
+            <div class="v">-</div>
+          </div>
+          <div>
+            <div class="k">재활용</div>
+            <div class="v">-</div>
+          </div>
+          <div>
+            <div class="k">음식물</div>
+            <div class="v">-</div>
+          </div>
+          <div>
+            <div class="k">기타</div>
+            <div class="v">-</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- 두 개 버튼 패널 -->
+      <div class="twoup">
+        <div class="panel green">
+          <h4>음식물 수거용기(통) 판매소</h4>
+          <p>내 주변에 있는 음식물 수거용기 판매처 위치를 알아보세요.</p>
+          <a href="#" class="btn">바로가기</a>
+        </div>
+        <div class="panel blue">
+          <h4>재활용동네마당 지도</h4>
+          <p>내 주변의 재활용동네마당 위치와 시설을 확인해보세요.</p>
+          <a href="#" class="btn">바로가기</a>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Bottom Navigation -->
+    <footer class="bottom" aria-label="하단 네비게이션">
+      <nav class="nav">
+        <a href="#" class="item">
+          <div>🗺️</div>
+          <div>지도</div>
+        </a>
+        <a href="#" class="item">
+          <div>🤝</div>
+          <div>참여</div>
+        </a>
+
+        <div class="home-fab" aria-label="홈">
+          <div class="dot"></div>
+        </div>
+
+        <a href="#" class="item">
+          <div>🏢</div>
+          <div>센터</div>
+        </a>
+        <a href="#" class="item">
+          <div>ℹ️</div>
+          <div>정보</div>
+        </a>
+      </nav>
+    </footer>
+
+  </div>
+
+  <script>
+    // 햄버거 → 드로어 열기/닫기
+    const drawer = document.getElementById('drawer');
+    document.getElementById('btnMenu').addEventListener('click', ()=> drawer.classList.add('open'));
+    document.getElementById('backdrop').addEventListener('click', ()=> drawer.classList.remove('open'));
+
+    // 간단한 배너 슬라이더
+    const slides = document.getElementById('slides');
+    let idx = 0;
+    setInterval(()=>{
+      idx = (idx+1)%2;
+      slides.style.transform = `translateX(-${idx*100}%)`;
+    }, 3500);
+  </script>
+</body>
+</html>
