@@ -194,10 +194,7 @@
             data: {"user_id": user_id, "user_pwd": user_pwd},
             success: function (result) {
                 if(result === "success"){
-                    if (window.parent && window.parent.closeLoginModal) {
-                        window.parent.closeLoginModal();
-                        window.parent.location.reload();
-                    }
+                    window.location = "/";
                 } else {
                     alert("로그인 실패");
                 }
