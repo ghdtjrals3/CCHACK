@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### app key ###
+src/main/resources/static/js/config.local.js

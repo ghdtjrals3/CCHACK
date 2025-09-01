@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>쓰레기 해결 • Kakao Map (춘천)</title>
+
+  <!-- 1) APP_KEY 들어있는 로컬 파일 (Live Server 경로) -->
+  <!-- Spring Boot면 /js/config.local.js 로 교체 -->
+  <script src="../../static/js/config.local.js"></script>
+
+  <!-- 2) Kakao SDK 동적 로더 (autoload=false → 로드 후 initApp 실행) -->
+  <script>
+    (function loadKakao() {
+      if (!window.APP_KEY) {
+        console.error("APP_KEY 없음. ../../static/js/config.local.js 로드 확인");
+        return;
+      }
+      var s = document.createElement("script");
+      s.src = "https://dapi.kakao.com/v2/maps/sdk.js?appkey=" + encodeURIComponent(window.APP_KEY) + "&autoload=false";
+      s.async = true;
+      s.onload = function () {
+        kakao.maps.load(initApp);
+      };
+      document.head.appendChild(s);
+
+      // ====== SDK가 준비된 뒤 실행되는 초기화 함수 ======
+      function initApp() {
+        var run = function () {
+          // 지도
+          var mapEl = document.getElementById("map");
+          if (!mapEl) { console.error("#map 없음"); return; }
+          var map = new kakao.maps.Map(mapEl, {
+            center: new kakao.maps.LatLng(37.8813, 127.73),
+            level: 5,
+          });
+          bindMap(map);
+
+          // 목록
+          renderListResponsive();
+          enableSwipeIfMobile();
+
+          // 리사이즈 대응
+          var lastMobile = isMobile();
+          window.addEventListener("resize", function () {
+            var nowMobile = isMobile();
+            if (nowMobile !== lastMobile) {
+              lastMobile = nowMobile;
+              renderListResponsive();
+              enableSwipeIfMobile();
+            } else if (!nowMobile) {
+              renderListWeb(currentPage);
+            }
+          });
+        };
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", run);
+        } else {
+          run();
+        }
+      }
+    })();
+  </script>
+
+  <style>
+    :root { --line:#e5e7eb; --bg:#f6f7f9; --card:#fff; --danger:#ff1f43; --ink:#222; --muted:#6b7280; }
+    html,body{height:100%;margin:0;font-family:"Noto Sans KR",system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+    header{height:56px;display:flex;align-items:center;justify-content:center;background:#fff;border-bottom:1px solid var(--line);font-weight:700}
+    .container{height:calc(100% - 56px);display:flex;flex-direction:column}
+    .map-wrap{flex:1;position:relative}
+    #map{position:absolute;inset:0} /* 부모가 flex:1 이라 실제 높이 확보됨 */
+
+    /* FAB */
+    .fab{position:fixed;right:16px;top:70px;z-index:9999;width:56px;height:56px;border-radius:50%;background:var(--danger);display:flex;align-items:center;justify-content:center;color:#fff;border:0;cursor:pointer;box-shadow:0 8px 18px rgba(0,0,0,.25)}
+    .fab svg{width:28px;height:28px}
+
+    /* 목록 공통 */
+    .list{background:#fff;border-top:1px solid var(--line);overflow:auto}
+    .item{padding:12px;border-bottom:1px solid var(--line);cursor:pointer}
+    .item:hover{background:#fafafa}
+    .title{font-weight:600}
+    .addr{font-size:12px;color:#666}
+    .pagination{display:flex;justify-content:center;gap:6px;padding:8px}
+    .pagination button{border:1px solid var(--line);background:#fff;padding:4px 8px;border-radius:4px;cursor:pointer}
+    .pagination button.active{background:#333;color:#fff}
+
+    /* 모바일: 바텀시트(스와이프) */
+    @media (max-width: 767px){
+      .list{position:fixed;left:0;right:0;bottom:0;z-index:9998;max-height:80vh;height:50vh;border-radius:16px 16px 0 0;box-shadow:0 -12px 20px rgba(0,0,0,.12);transform:translateY(70%);transition:transform .25s ease;touch-action:none;will-change:transform;user-select:none}
+      .list.open{transform:translateY(0)}
+      .handle{width:44px;height:5px;border-radius:999px;background:#d1d5db;margin:10px auto 6px;cursor:grab}
+      .pagination{display:none}
+    }
+    /* 데스크톱: 고정 목록 + 페이지네이션 */
+    @media (min-width: 768px){
+      .list{position:static;transform:none!important;height:clamp(220px, 32vh, 560px);max-height:none}
+      .handle{display:none}
+    }
+
+    /* 모달 */
+    .modal{position:fixed;inset:0;z-index:12000;display:none}
+    .modal.open{display:block}
+    .modal .overlay{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+    .modal .sheet{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(640px,92vw);max-height:86vh;overflow:auto;background:#fff;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,.25)}
+    .m-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line)}
+    .points{font-weight:800;font-size:18px;background:#ffe8ec;color:#b91c1c;border-radius:999px;padding:6px 12px;display:inline-flex;align-items:center;gap:6px}
+    .points.disabled{background:#f3f4f6;color:#9ca3af;filter:grayscale(1)}
+    .title-row{display:flex;align-items:center;gap:8px;font-weight:800}
+    .pill-done{font-size:12px;color:#065f46;background:#d1fae5;border:1px solid #a7f3d0;border-radius:999px;padding:3px 8px}
+    .close{border:0;background:#f3f4f6;border-radius:10px;width:36px;height:36px;cursor:pointer}
+    .m-body{padding:10px 16px 18px}
+    .section{margin-top:10px}
+    .label{font-weight:700;margin:10px 0 6px}
+    .photo{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;border:1px solid var(--line);background:#f8fafc}
+    .comment{color:#374151;margin-top:6px;line-height:1.5}
+    .meta{color:var(--muted);font-size:12px;margin-top:4px}
+  </style>
+</head>
+<body>
+  <header>쓰레기 해결</header>
+
+  <div class="container">
+    <div class="map-wrap"><div id="map"></div></div>
+
+    <!-- 목록 -->
+    <div class="list" id="listPanel" aria-label="신고/해결 목록">
+      <div class="handle" aria-hidden="true"></div>
+      <div id="listContent"></div>
+      <div class="pagination" id="pagination"></div>
+    </div>
+  </div>
+
+  <!-- 우상단 사이렌 버튼 (디자인만, 기능은 별도 모달에서 이미 구현했었음) -->
+  <button class="fab" id="fab" aria-label="신고/해결">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M7 11V9a5 5 0 0 1 10 0v2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+      <rect x="4" y="11" width="16" height="7" rx="2" fill="rgba(255,255,255,.15)" stroke="#fff" stroke-width="1.6"/>
+      <path d="M12 3v2M5.5 5.5l1.5 1.5M18.5 5.5 17 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </button>
+
+  <!-- 상세 모달 -->
+  <div class="modal" id="detailModal" aria-modal="true" role="dialog">
+    <div class="overlay" id="modalOverlay"></div>
+    <div class="sheet" role="document">
+      <div class="m-head">
+        <div class="points" id="mPoints">200p</div>
+        <button class="close" id="modalClose" aria-label="닫기">✕</button>
+      </div>
+      <div class="m-body">
+        <div class="title-row">
+          <div id="mReporter">@@님의 신고</div>
+          <div class="pill-done" id="mDone" style="display:none">해결완료</div>
+        </div>
+        <div class="meta" id="mAddr"></div>
+        <div class="section">
+          <div class="label">신고 사진</div>
+          <img id="mReportImg" class="photo" alt="신고 사진">
+          <div class="comment" id="mReportComment"></div>
+        </div>
+        <div class="section" id="resolveSection" style="display:none">
+          <div class="label"><span id="mResolver">##님의 해결</span></div>
+          <img id="mResolveImg" class="photo" alt="해결 사진">
+          <div class="comment" id="mResolveComment"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /************ 데이터(춘천 5곳) ************/
+    const data = [
+      { id:1, title:"쓰레기 신고", addr:"춘천시 중앙로 67 (명동 일대)", lat:37.8813, lng:127.73, reporter:"김민수", points:200, reportImg:"https://picsum.photos/seed/report1/960/540", reportComment:"성원초 앞에 종량제 봉투가 터져있음", resolved:false },
+      { id:2, title:"방치된 쓰레기", addr:"춘천시 석사동 강원대학교 정문", lat:37.874, lng:127.744, reporter:"박지영", points:150, reportImg:"https://picsum.photos/seed/report2/960/540", reportComment:"정문 앞 화단에 페트병과 일회용컵 다수", resolved:true, resolver:"이도현", resolveImg:"https://picsum.photos/seed/resolve2/960/540", resolveComment:"분리수거 후 남은 잔여물 수거 완료" },
+      { id:3, title:"불법투기 의심", addr:"춘천시 후평동 후평시장", lat:37.892, lng:127.744, reporter:"장하늘", points:120, reportImg:"https://picsum.photos/seed/report3/960/540", reportComment:"폐지더미에 일반쓰레기 섞여 있음", resolved:false },
+      { id:4, title:"생활폐기물 신고", addr:"춘천시 퇴계동 홈플러스 근처", lat:37.862, lng:127.723, reporter:"윤서연", points:300, reportImg:"https://picsum.photos/seed/report4/960/540", reportComment:"가로변에 대형폐기물(의자) 방치", resolved:true, resolver:"최재훈", resolveImg:"https://picsum.photos/seed/resolve4/960/540", resolveComment:"대형폐기물 스티커 구매 후 배출" },
+      { id:5, title:"방치된 폐가구", addr:"춘천시 온의동 의암호 공원", lat:37.889, lng:127.716, reporter:"오수진", points:180, reportImg:"https://picsum.photos/seed/report5/960/540", reportComment:"산책로 옆에 서랍장 방치", resolved:false }
+    ];
+
+    /************ 목록: 웹/앱 대응 ************/
+    let currentPage = 1;
+    let itemsPerPage = 2;
+    const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
+
+    function measureItemHeight(){
+      const listContent = document.getElementById('listContent');
+      const probe = document.createElement('div');
+      probe.className='item'; probe.style.visibility='hidden';
+      probe.innerHTML=`<div class="title">측정</div><div class="addr">가나다</div>`;
+      listContent.appendChild(probe);
+      const h = probe.offsetHeight || 64;
+      listContent.removeChild(probe);
+      return h;
+    }
+    function computeItemsPerPage(){
+      if (isMobile()) return data.length;
+      const panel = document.getElementById('listPanel');
+      const pagination = document.getElementById('pagination');
+      const available = panel.clientHeight - (pagination.offsetHeight||0) - 12;
+      const itemH = measureItemHeight();
+      return Math.max(1, Math.floor(available / itemH));
+    }
+    function addListItem(it){
+      const div=document.createElement('div');
+      div.className='item';
+      div.innerHTML=`<div class="title">${it.title}</div><div class="addr">${it.addr}</div>`;
+      div.onclick=()=>openModal(it);
+      document.getElementById('listContent').appendChild(div);
+    }
+    function renderListWeb(page=1){
+      itemsPerPage = computeItemsPerPage();
+      const listContent = document.getElementById('listContent');
+      const pagination  = document.getElementById('pagination');
+      listContent.innerHTML=""; pagination.innerHTML="";
+      const totalPages = Math.max(1, Math.ceil(data.length/itemsPerPage));
+      if (page>totalPages) page = totalPages;
+      currentPage = page;
+      const start = (currentPage-1)*itemsPerPage;
+      const slice = data.slice(start, start+itemsPerPage);
+      slice.forEach(addListItem);
+      for(let i=1;i<=totalPages;i++){
+        const btn=document.createElement('button');
+        btn.textContent=i; if(i===currentPage) btn.classList.add('active');
+        btn.onclick=()=>renderListWeb(i);
+        pagination.appendChild(btn);
+      }
+    }
+    function renderListMobile(){
+      const listContent = document.getElementById('listContent');
+      const pagination  = document.getElementById('pagination');
+      listContent.innerHTML=""; pagination.innerHTML="";
+      data.forEach(addListItem);
+    }
+    function renderListResponsive(){ if (isMobile()) renderListMobile(); else renderListWeb(currentPage); }
+
+    /************ 상세 모달 ************/
+    const modal = {
+      el: document.getElementById('detailModal'),
+      points: document.getElementById('mPoints'),
+      reporter: document.getElementById('mReporter'),
+      done: document.getElementById('mDone'),
+      addr: document.getElementById('mAddr'),
+      reportImg: document.getElementById('mReportImg'),
+      reportComment: document.getElementById('mReportComment'),
+      resolveSection: document.getElementById('resolveSection'),
+      resolver: document.getElementById('mResolver'),
+      resolveImg: document.getElementById('mResolveImg'),
+      resolveComment: document.getElementById('mResolveComment'),
+      overlay: document.getElementById('modalOverlay'),
+      closeBtn: document.getElementById('modalClose'),
+    };
+
+    function openModal(item){
+      modal.points.textContent = item.points + 'p';
+      modal.points.classList.toggle('disabled', !!item.resolved);
+      modal.reporter.textContent = item.reporter + '님의 신고';
+      modal.done.style.display = item.resolved ? 'inline-flex' : 'none';
+      modal.addr.textContent = item.addr;
+      modal.reportImg.src = item.reportImg;
+      modal.reportImg.alt = item.reporter + ' 신고 사진';
+      modal.reportComment.textContent = item.reportComment || '';
+      if (item.resolved){
+        modal.resolveSection.style.display = '';
+        modal.resolver.textContent = (item.resolver || '누군가') + '님의 해결';
+        modal.resolveImg.src = item.resolveImg || 'https://picsum.photos/seed/resolve_default/960/540';
+        modal.resolveImg.alt = (item.resolver || '누군가') + ' 해결 사진';
+        modal.resolveComment.textContent = item.resolveComment || '';
+      } else {
+        modal.resolveSection.style.display = 'none';
+      }
+      modal.el.classList.add('open');
+      document.documentElement.style.overflow='hidden';
+    }
+    function closeModal(){
+      modal.el.classList.remove('open');
+      document.documentElement.style.overflow='';
+    }
+    modal.overlay.onclick = closeModal;
+    modal.closeBtn.onclick = closeModal;
+    window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
+
+    /************ 바텀시트 스와이프(모바일만) ************/
+    let detachSwipe;
+    function enableSwipeIfMobile(){
+      const listPanel = document.getElementById('listPanel');
+      const handle    = listPanel.querySelector('.handle');
+      if (detachSwipe){ detachSwipe(); detachSwipe=null; }
+      if (!isMobile()){ listPanel.style.transform=''; listPanel.classList.remove('open'); return; }
+      let basePercent = 70;
+      setTranslate(basePercent);
+      let dragging=false, startY=0;
+      function setTranslate(p){ listPanel.style.transform=`translateY(${p}%)`; }
+      function curPercent(){ const m=/translateY\(([-\d.]+)%\)/.exec(listPanel.style.transform); return m?parseFloat(m[1]):basePercent; }
+      function down(e){ dragging=true; startY=e.clientY ?? (e.touches && e.touches[0].clientY) ?? 0; listPanel.style.transition='none'; e.target.setPointerCapture?.(e.pointerId); }
+      function move(e){ if(!dragging) return; const y=e.clientY ?? (e.touches && e.touches[0].clientY) ?? 0; const dy=y-startY; const dp=(dy/window.innerHeight)*100; let next=Math.max(0, Math.min(70, basePercent+dp)); setTranslate(next); e.preventDefault?.(); }
+      function up(){ if(!dragging) return; dragging=false; listPanel.style.transition='transform .25s ease'; const c=curPercent(); if(c>40){ basePercent=70; listPanel.classList.remove('open'); } else { basePercent=0; listPanel.classList.add('open'); } setTranslate(basePercent); }
+      const target = handle || listPanel;
+      target.style.touchAction='none';
+      target.addEventListener('pointerdown',down,{passive:false});
+      window.addEventListener('pointermove',move,{passive:false});
+      window.addEventListener('pointerup',up,{passive:true});
+      window.addEventListener('pointercancel',up,{passive:true});
+      detachSwipe=()=>{ target.removeEventListener('pointerdown',down); window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',up); window.removeEventListener('pointercancel',up); listPanel.style.transition=''; };
+    }
+
+    /************ 지도 마커 바인딩 ************/
+    function bindMap(map){
+      data.forEach(function(it){
+        var marker = new kakao.maps.Marker({
+          position:new kakao.maps.LatLng(it.lat, it.lng), map:map, title:it.title
+        });
+        kakao.maps.event.addListener(marker, 'click', function(){ openModal(it); });
+      });
+    }
+  </script>
+</body>
+</html>
