@@ -2,6 +2,7 @@ package kopo.poly.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.websocket.Session;
 import kopo.poly.dto.ReportCreDTO;
 import kopo.poly.dto.SolutionDTO;
 import kopo.poly.dto.UserDTO;
@@ -12,11 +13,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
@@ -83,6 +82,18 @@ public class TrashController {
         log.info(this.getClass().getName() + " reportSolution End!!");
         return "";
     }
+
+
+    @GetMapping(value = "reportPage")
+    public String reportPage(HttpSession session, ModelMap model) throws Exception{
+        log.info(this.getClass().getName() + " reportPage Start!!");
+        log.info(this.getClass().getName() + " reportPage End!!");
+
+        return "/trash/export";
+
+    }
+
+
 
 
 
