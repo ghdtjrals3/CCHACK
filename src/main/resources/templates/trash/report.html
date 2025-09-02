@@ -206,12 +206,12 @@
           </div>
         </div>
         <div class="field">
-          <label for="reportDesc">설명</label>
-          <textarea id="reportDesc" rows="4" placeholder="예) 성원초 앞 종량제 봉투가 찢어져 있다." style="width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;"></textarea>
+          <label for="description">설명</label>
+          <textarea id="description" rows="4" placeholder="예) 성원초 앞 종량제 봉투가 찢어져 있다." style="width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;"></textarea>
         </div>
         <div class="actions">
           <button class="btn" id="reportCancel">취소</button>
-          <button class="btn primary" id="reportSubmit">신고하기</button>
+          <button class="btn primary" onclick="reportCreate();">신고하기</button>
         </div>
       </div>
 
@@ -235,7 +235,7 @@
       </div>
     </div>
   </div>
-
+  <script src="https://cdn.jsdelivr.net/npm/exifr/dist/lite.umd.js"></script>
   <script>
     /************ 데이터(춘천 5곳) ************/
     const data = [
@@ -426,7 +426,6 @@
     bindPreview(action.resolveFile, action.resolvePreview);
 
     // 제출
-    action.reportSubmit.onclick = ()=>{ alert('신고가 완료되었습니다.'); closeActionModal(); };
     action.reportCancel.onclick = closeActionModal;
     action.resolveSubmit.onclick = ()=>{
       alert(action.rewardPoints + 'p를 받으셨습니다.');
@@ -468,5 +467,91 @@
       });
     }
   </script>
+
+  <!-- EXIF 파서 (full) -->
+  <script src="https://cdn.jsdelivr.net/npm/exifr/dist/exifr.umd.js" defer></script>
+
+  <!-- 필요하면 CSRF 메타가 이미 페이지에 있어야 합니다 -->
+  <!-- <meta name="_csrf_header" content="X-CSRF-TOKEN">
+  <meta name="_csrf"        content="..."> -->
+  <script>
+      let LAT = null;
+      let LON = null;
+      let LAST_TS = null;   // (선택) 타임스탬프
+
+      function success({ coords, timestamp }) {
+          LAT = coords.latitude;
+          LON = coords.longitude;
+          LAST_TS = timestamp;
+          console.log('업데이트:', LAT, LON, 'ts=', LAST_TS);
+      }
+
+      function error(err) {
+          console.warn('geo fail', err);
+      }
+
+      function getUserLocation() {
+          if (!navigator.geolocation) {
+              alert('위치 정보가 지원되지 않습니다.');
+              return;
+          }
+          // 연속 업데이트: 필요 없으면 clearWatch로 중지
+          window._watchId = navigator.geolocation.watchPosition(
+              success,
+              error,
+              { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+          );
+      }
+
+      function stopWatch() {
+          if (window._watchId != null) {
+              navigator.geolocation.clearWatch(window._watchId);
+              window._watchId = null;
+          }
+      }
+
+      getUserLocation();
+
+      function getGeoOnce(opts = { enableHighAccuracy:true, timeout:15000, maximumAge:0 }) {
+          return new Promise((resolve, reject) =>
+              navigator.geolocation.getCurrentPosition(resolve, reject, opts)
+          );
+      }
+
+      async function reportCreate() {
+          const descriptionEl = document.getElementById('description');
+          const fileInput     = document.getElementById('reportFile'); // id 일치
+          const file          = fileInput?.files?.[0];
+          if (!file) { alert('이미지를 선택해주세요.'); return; }
+          const description = (descriptionEl?.value || '').trim();
+
+
+          const fd = new FormData();
+          fd.append('description', description);
+          fd.append('image_url', file);
+          fd.append('latitude',  LAT);
+          fd.append('longitude', LON);
+
+          const headers = {};
+          const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+          const csrfToken  = document.querySelector('meta[name="_csrf"]')?.content;
+          if (csrfHeader && csrfToken) headers[csrfHeader] = csrfToken;
+
+          console.log('description :', description);
+          console.log('file       :', file);
+          console.log('lat        :', LAT);
+          console.log('lon        :', LON);
+
+          const res = await fetch('/trash/reportCreate', { method:'POST', body:fd, headers });
+          if (!res.ok) throw new Error(`서버 오류: ${res.status}`);
+          alert('신고가 등록되었습니다.');
+      }
+      window.reportCreate = reportCreate; // onclick으로 호출한다면 유지
+  </script>
+
+
+
+
+
 </body>
 </html>

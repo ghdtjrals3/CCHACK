@@ -5,29 +5,23 @@
 <mapper namespace="kopo.poly.mapper.ITrashMapper">
 
     <insert id="reportProc" parameterType="ReportCreDTO">
-        INSERT INTO report
+        INSERT INTO trash_report
         (
             reporter_id,
-            category,
             description,
             image_url,
-            residence_dong,
             lat,
             lng,
-            priority,
             status,
             created_at
         )
         VALUES
             (
                 #{reporter_id},
-                #{category},
                 #{description},
                 #{image_url},
-                #{residence_dong},
                 #{lat,jdbcType=DOUBLE},
                 #{lng,jdbcType=DOUBLE},
-                #{priority},
                 #{status},
                 NOW()
             )

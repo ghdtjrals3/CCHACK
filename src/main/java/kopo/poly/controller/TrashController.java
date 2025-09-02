@@ -26,42 +26,30 @@ public class TrashController {
 
     private final ITrashService trashService;
 
-    @PostMapping(value = "reportProc",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @ResponseBody
-    public String reportProc(HttpSession session, ModelMap map, HttpServletRequest request, @RequestParam(name="image", required = false) MultipartFile image) throws Exception{
+    @PostMapping(value = "reportCreate",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public String reportCreate(HttpSession session, ModelMap map, HttpServletRequest request, @RequestParam(name="image_url", required = false) MultipartFile image) throws Exception{
         log.info(this.getClass().getName() + " reportProc Start!!");
+
+        log.info(request.getParameter("description"));
+        log.info(request.getParameter("latitude"));
+        log.info(request.getParameter("longitude"));
+        log.info(image.toString());
 
         ReportCreDTO rDTO = new ReportCreDTO();
 
-        rDTO.setReporter_id(CmmUtil.nvl(request.getParameter("reporter_id")));
-        rDTO.setCategory(CmmUtil.nvl(request.getParameter("category")));
-        rDTO.setDescription(CmmUtil.nvl(request.getParameter("description")));
-        rDTO.setResidence_dong(CmmUtil.nvl(request.getParameter("residence_dong")));
 
-        String latStr = CmmUtil.nvl(request.getParameter("lat"));
-        String lngStr = CmmUtil.nvl(request.getParameter("lng"));
-        String priorityStr = CmmUtil.nvl(request.getParameter("priority"));
-
-        rDTO.setLat(latStr.isEmpty() ? null : Double.valueOf(latStr));
-        rDTO.setLng(lngStr.isEmpty() ? null : Double.valueOf(lngStr));
-        rDTO.setPriority(priorityStr.isEmpty() ? 0 : Integer.valueOf(priorityStr));
-
+        rDTO.setDescription(request.getParameter("description"));
+        rDTO.setLat(Double.parseDouble(request.getParameter("latitude")));
+        rDTO.setLng(Double.parseDouble(request.getParameter("longitude")));
         rDTO.setStatus("pending");
+        rDTO.setReporter_id((CmmUtil.nvl((String) session.getAttribute("user_id"))));
 
-        int result = trashService.reportProc(rDTO, image);
-        String msg;
+        trashService.reportProc(rDTO,image);
 
-        if(result == 0){
-            msg = "fail";
-            log.info(this.getClass().getName() + "signUpProc Fail!");
-        } else {
-            msg = "success";
-            log.info(this.getClass().getName() + "signUpProc Success!");
-        }
 
 
         log.info(this.getClass().getName() + " reportProc End!!");
-        return msg;
+        return "/trash/report";
     }
 
     @PostMapping(value="solution", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
