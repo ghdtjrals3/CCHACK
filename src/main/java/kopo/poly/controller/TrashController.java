@@ -89,7 +89,7 @@ public class TrashController {
         log.info(this.getClass().getName() + " reportPage Start!!");
         log.info(this.getClass().getName() + " reportPage End!!");
 
-        return "/trash/export";
+        return "/trash/report";
 
     }
 

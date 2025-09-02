@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko" th:with="currentTab='home'">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -156,7 +156,6 @@ a{text-decoration:none}
             <a th:if="${#strings.isEmpty(session.user_id)}" th:href="@{/user/login}">로그인</a>
             <!-- 로그인 후만 보이기 -->
             <a th:unless="${#strings.isEmpty(session.user_id)}" th:href="@{/user/myPage}">내 정보</a>
-
         </div>
       </div>
       <div class="search-wrap">
@@ -179,7 +178,19 @@ a{text-decoration:none}
     </div>
 
     <main class="app-main">
-      <article class="card"><div class="card-h"><div class="icon">💰</div><div class="meta"><div class="title">포인트 현황</div><div class="muted">로그인을 진행해주세요.</div></div><a class="right-link" href="#">로그인</a></div></article>
+      <article class="card">
+          <div class="card-h">
+              <div class="icon">💰</div>
+              <div class="meta">
+                  <div class="title">포인트 현황</div>
+
+                  <div class="muted" th:if="${uDTO == null or uDTO.user_id == null}">로그인을 진행해주세요.</div>
+                  <div class="muted" th:unless="${uDTO == null or uDTO.user_id == null}">보유 포인트:
+                      <span th:text="${uDTO.point}">0</span>P</div>
+              </div>
+              <a class="right-link" href="user/login" th:if="${uDTO == null or uDTO.user_id == null}">로그인</a>
+          </div>
+      </article>
       <article class="card"><div class="card-h"><div class="icon">🚨</div><div class="meta"><div class="title">쓰레기 신고 · 해결</div><div class="muted">8건이 기다리고 있어요. 참여하면 포인트도 모아봐요!</div></div><a class="right-link" href="#">해결하기 ›</a></div></article>
       <article class="card"><div class="card-h"><div class="icon">🗑️</div><div class="meta"><div class="title">스마트 배출함</div><div class="muted">우유팩 수거기 · 01번 배출함</div></div><a class="right-link" href="#">더보기 ›</a></div></article>
       <article class="card"><div class="card-h"><div class="icon">🏪</div><div class="meta"><div class="title">동구라미가게</div><div class="muted">친환경자원순환센터, 동구문화센터</div></div><a class="right-link" href="#">더보기 ›</a></div></article>
@@ -238,7 +249,7 @@ a{text-decoration:none}
 
         <!-- 로그인 후만 보이기 -->
         <a th:unless="${#strings.isEmpty(session.user_id)}" th:href="@{/user/myPage}">내 정보</a>
-        >
+
     </div>
   </header>
 
@@ -250,7 +261,10 @@ a{text-decoration:none}
   <div class="web-container">
     <!-- 히어로 아래 카드들(자연 반응형, 잘림 없음) -->
     <div class="web-cards">
-      <div class="wcard"><strong>포인트 현황</strong><br><span class="muted">로그인을 진행해주세요.</span></div>
+      <div class="wcard"><strong>포인트 현황</strong><br>
+          <span class="muted" th:if="${uDTO == null or uDTO.user_id == null}">로그인을 진행해주세요.</span>
+          <span class="muted" th:unless="${uDTO == null or uDTO.user_id == null}">보유 포인트: <span th:text="${uDTO.point}">0</span>P</span>
+      </div>
       <div class="wcard"><strong>쓰레기 신고 · 해결</strong><br><span class="muted">8건이 기다리고 있어요.</span></div>
       <div class="wcard"><strong>스마트 배출함</strong><br><span class="muted">우유팩 수거기 · 01번 배출함</span></div>
       <div class="wcard"><strong>동구라미가게</strong><br><span class="muted">친환경자원순환센터, 동구문화센터</span></div>

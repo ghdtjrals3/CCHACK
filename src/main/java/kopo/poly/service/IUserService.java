@@ -11,4 +11,6 @@ public interface IUserService {
     int signUpProc(UserDTO uDTO) throws Exception;
 
     int checkId(UserDTO uDTO) throws Exception;
+
+    UserDTO getUserInfo(String user_id) throws Exception;
 }

@@ -62,5 +62,12 @@ public class UserService implements IUserService {
         return userMapper.checkId(uDTO);
     }
 
+    @Override
+    public UserDTO getUserInfo(String user_id) throws Exception {
+        log.info(this.getClass().getName() + ".getUserInfo Service Start!");
+        log.info(this.getClass().getName() + ".getUserInfo Service End!");
+        return userMapper.getUserInfo(user_id);
+    }
+
 
 }
