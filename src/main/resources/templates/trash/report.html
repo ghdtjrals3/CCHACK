@@ -241,7 +241,7 @@
     const data = [
       { id:1, title:"쓰레기 신고", addr:"춘천시 중앙로 67 (명동 일대)", lat:37.8813, lng:127.7300,
         reporter:"김민수", points:200, reportImg:"https://picsum.photos/seed/report1/960/540",
-        reportComment:"성원초 앞에 종량제 봉투가 터져있음", resolved:false },
+        reportComment:"성원초 앞에 종량제 봉투가 터져있음", resolved:false},
       { id:2, title:"방치된 쓰레기", addr:"춘천시 석사동 강원대학교 정문", lat:37.874, lng:127.744,
         reporter:"박지영", points:150, reportImg:"https://picsum.photos/seed/report2/960/540",
         reportComment:"정문 앞 화단에 페트병과 일회용컵 다수", resolved:true, resolver:"이도현",
@@ -383,26 +383,37 @@
       resolveDesc: document.getElementById('resolveDesc'),
       resolveSubmit: document.getElementById('resolveSubmit'),
       resolveCancel: document.getElementById('resolveCancel'),
+        resolveIdInput: document.getElementById('resolveTargetId'),
       rewardPoints: 200,
       mode: 'report',
       targetItem: null
     };
 
     function openActionModal(mode='report', item=null){
-      action.mode = mode;
-      action.targetItem = item;
-      // 타이틀/보이는 폼 전환
-      if(mode==='report'){
-        action.title.textContent = '신고하기';
-        action.reportForm.style.display = '';
-        action.resolveForm.style.display = 'none';
-      }else{
-        action.title.textContent = '해결하기';
-        action.reportForm.style.display = 'none';
-        action.resolveForm.style.display = '';
-      }
-      action.el.classList.add('open');
-      document.documentElement.style.overflow='hidden';
+        action.mode = mode;
+        action.targetItem = item;
+
+        if(mode==='report'){
+            action.title.textContent = '신고하기';
+            action.reportForm.style.display = '';
+            action.resolveForm.style.display = 'none';
+            // ★ report 모드로 열릴 땐 id 초기화
+            if (action.resolveIdInput) action.resolveIdInput.value = '';
+            // if (action.resolveIdText) action.resolveIdText.textContent = '';
+        } else {
+            action.title.textContent = '해결하기';
+            action.reportForm.style.display = 'none';
+            action.resolveForm.style.display = '';
+
+            // ★ 클릭한 게시글의 id 주입 + 콘솔 출력
+            const id = item?.id ?? item?.er_id ?? item?.reportId ?? '';
+            if (action.resolveIdInput) action.resolveIdInput.value = id;
+            console.log('[resolve-open] report_id:', id, 'item:', item);
+            // if (action.resolveIdText) action.resolveIdText.textContent = id;
+        }
+
+        action.el.classList.add('open');
+        document.documentElement.style.overflow='hidden';
     }
     function closeActionModal(){ action.el.classList.remove('open'); document.documentElement.style.overflow=''; }
     action.overlay.onclick = closeActionModal;
@@ -427,11 +438,44 @@
 
     // 제출
     action.reportCancel.onclick = closeActionModal;
-    action.resolveSubmit.onclick = ()=>{
-      alert(action.rewardPoints + 'p를 받으셨습니다.');
-      closeActionModal();
-      // 원하면 여기서 detail.currentItem.resolved = true 로 바꾸고 화면도 갱신 가능
-      // 예: if (action.targetItem) { action.targetItem.resolved = true; ...UI 갱신... }
+
+
+    action.resolveSubmit.onclick = async () => {
+        const file = action.resolveFile?.files?.[0];
+        const desc = (action.resolveDesc?.value || '').trim();
+        const reportId = action.resolveIdInput?.value || (action.targetItem?.id ?? '');
+
+        console.log('[resolve-submit] report_id:', reportId); // ← 확인용 로그
+
+        if (!reportId) { alert('대상 신고 ID가 없습니다.'); return; }
+        if (!file)     { alert('해결 사진을 선택해주세요.'); return; }
+
+        // 서버로 보낼 경우 예시(FormData)
+        /*
+        const fd = new FormData();
+        fd.append('report_id', reportId);
+        fd.append('description', desc);
+        fd.append('image_url', file);
+
+        const headers = {};
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+        const csrfToken  = document.querySelector('meta[name="_csrf"]')?.content;
+        if (csrfHeader && csrfToken) headers[csrfHeader] = csrfToken;
+
+        try {
+          const res = await fetch('/trash/resolveCreate', { method:'POST', body:fd, headers });
+          if (!res.ok) throw new Error('서버 오류: ' + res.status);
+          alert('해결이 등록되었습니다.');
+          closeActionModal();
+        } catch (e) {
+          console.error(e);
+          alert('업로드 실패: ' + (e?.message || '알 수 없는 오류'));
+        }
+        */
+
+        // 데모용
+        alert(action.rewardPoints + 'p를 받으셨습니다.');
+        closeActionModal();
     };
     action.resolveCancel.onclick = closeActionModal;
 
@@ -524,6 +568,7 @@
           const file          = fileInput?.files?.[0];
           if (!file) { alert('이미지를 선택해주세요.'); return; }
           const description = (descriptionEl?.value || '').trim();
+          const title = document.getElementById("title");
 
 
           const fd = new FormData();
@@ -531,6 +576,7 @@
           fd.append('image_url', file);
           fd.append('latitude',  LAT);
           fd.append('longitude', LON);
+          fd.append('title', title);
 
           const headers = {};
           const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;

@@ -18,6 +18,8 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Slf4j
 @RequestMapping(value = "/trash")
 @RequiredArgsConstructor
@@ -43,6 +45,7 @@ public class TrashController {
         rDTO.setLng(Double.parseDouble(request.getParameter("longitude")));
         rDTO.setStatus("pending");
         rDTO.setReporter_id((CmmUtil.nvl((String) session.getAttribute("user_id"))));
+        rDTO.setTitle(request.getParameter("title"));
 
         trashService.reportProc(rDTO,image);
 
@@ -75,6 +78,12 @@ public class TrashController {
     @GetMapping(value = "reportPage")
     public String reportPage(HttpSession session, ModelMap model) throws Exception{
         log.info(this.getClass().getName() + " reportPage Start!!");
+
+        ReportCreDTO rDTO = new ReportCreDTO();
+        List<ReportCreDTO> rList = trashService.selectAllTrash();
+
+        log.info("size : " + rList.size());
+
         log.info(this.getClass().getName() + " reportPage End!!");
 
         return "/trash/report";

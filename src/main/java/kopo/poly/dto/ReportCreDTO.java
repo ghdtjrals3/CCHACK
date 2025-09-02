@@ -1,6 +1,7 @@
 package kopo.poly.dto;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.cglib.core.Local;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
@@ -17,15 +18,19 @@ public class ReportCreDTO {
 
     private Long report_id;          // PK
     private String reporter_id;      // 신고자
-    private String category;         // 유형
     private String description;      // 설명
     private String image_url;        // 첨부 이미지
     private Double lat;              // 위도
     private Double lng;              // 경도
-    private String residence_dong;   // 행정동
-    private Integer priority;        // 우선순위
     private String status;           // 상태 (pending / resolved 등)
+    private String title;
+    private String point;
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
+    private String resolver_id;
+    private String note;
+    private String proof_image_url;
+    private LocalDateTime solved_at;
+
 }
 

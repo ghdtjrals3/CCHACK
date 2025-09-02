@@ -13,7 +13,8 @@
             lat,
             lng,
             status,
-            created_at
+            created_at,
+            title
         )
         VALUES
             (
@@ -23,7 +24,8 @@
                 #{lat,jdbcType=DOUBLE},
                 #{lng,jdbcType=DOUBLE},
                 #{status},
-                NOW()
+                NOW(),
+                #{title}
             )
     </insert>
 
@@ -51,6 +53,9 @@
         WHERE resolver_id = #{resolver_id}
     </select>
 
+    <select id="selectAllTrash" resultType="ReportCreDTO">
+        SELECT * FROM trash_report
+    </select>
 
 
 

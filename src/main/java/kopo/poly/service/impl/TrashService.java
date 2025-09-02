@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 
 @Slf4j
 @RequiredArgsConstructor
@@ -61,6 +63,14 @@ public class TrashService implements ITrashService {
 
         log.info(this.getClass().getName() + "TrashService.reportSolution End!!");
         return updateResult;
+    }
+
+    @Override
+    public List<ReportCreDTO> selectAllTrash() throws Exception {
+        log.info(this.getClass().getName() + "selectAllTrash Start!!");
+        log.info(this.getClass().getName() + "selectAllTrash End!!");
+
+        return trashMapper.selectAllTrash();
     }
 
 
