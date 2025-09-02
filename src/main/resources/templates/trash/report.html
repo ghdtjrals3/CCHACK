@@ -5,60 +5,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>쓰레기 해결 • Kakao Map (춘천)</title>
 
-  <!-- 1) APP_KEY 로컬 파일 (Live Server 경로) -->
-  <!-- Spring Boot면 src=/js/config.local.js 로 교체 -->
+  <!-- Live Server일 때 -->
   <script src="../../static/js/config.local.js"></script>
+  <!-- Spring Boot로 구동 시 ↑를 /js/config.local.js 로 바꾸세요 -->
 
-  <!-- 2) Kakao SDK 동적 로더: autoload=false → 로드 후 한 번만 초기화 -->
+  <!-- Kakao SDK 동적 로더 (한 번만 초기화) -->
   <script>
     (function loadKakao() {
-      if (!window.APP_KEY) {
-        console.error("APP_KEY 없음. ../../static/js/config.local.js 를 확인하세요.");
-        return;
-      }
+      if (!window.APP_KEY) { console.error("APP_KEY 없음. config.local.js 확인"); return; }
       var s = document.createElement("script");
       s.src = "https://dapi.kakao.com/v2/maps/sdk.js?appkey=" + encodeURIComponent(window.APP_KEY) + "&autoload=false";
       s.async = true;
-      s.onload = function () {
-        kakao.maps.load(initApp);  // SDK 준비된 뒤에만 실행
-      };
+      s.onload = function(){ kakao.maps.load(initApp); };
       document.head.appendChild(s);
 
-      function initApp() {
-        var run = function () {
+      function initApp(){
+        var run = function(){
           // 지도
           var mapEl = document.getElementById("map");
-          if (!mapEl) { console.error("#map 엘리먼트 없음"); return; }
-          var map = new kakao.maps.Map(mapEl, {
-            center: new kakao.maps.LatLng(37.8813, 127.7300),
-            level: 5
-          });
+          var map = new kakao.maps.Map(mapEl, { center:new kakao.maps.LatLng(37.8813,127.73), level:5 });
           bindMap(map);
 
-          // 목록/스와이프 초기 렌더
+          // 목록
           renderListResponsive();
           enableSwipeIfMobile();
 
-          // 리사이즈 대응
+          // 리사이즈
           var lastMobile = isMobile();
-          window.addEventListener("resize", function () {
+          window.addEventListener("resize", function(){
             var nowMobile = isMobile();
-            if (nowMobile !== lastMobile) {
-              lastMobile = nowMobile;
-              renderListResponsive();
-              enableSwipeIfMobile();
-            } else if (!nowMobile) {
-              renderListWeb(currentPage);
-            }
+            if(nowMobile!==lastMobile){ lastMobile=nowMobile; renderListResponsive(); enableSwipeIfMobile(); }
+            else if(!nowMobile){ renderListWeb(currentPage); }
           });
         };
-
-        // DOM 준비 보장
-        if (document.readyState === "loading") {
-          document.addEventListener("DOMContentLoaded", run);
-        } else {
-          run();
-        }
+        if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", run); else run();
       }
     })();
   </script>
@@ -72,7 +52,7 @@
     .map-wrap{flex:1;position:relative}
     #map{position:absolute;inset:0}
 
-    /* FAB */
+    /* FAB (신고 전용) */
     .fab{position:fixed;right:16px;top:70px;z-index:9999;width:56px;height:56px;border-radius:50%;
          background:var(--danger);display:flex;align-items:center;justify-content:center;color:#fff;border:0;cursor:pointer;
          box-shadow:0 8px 18px rgba(0,0,0,.25)}
@@ -88,7 +68,7 @@
     .pagination button{border:1px solid var(--line);background:#fff;padding:4px 8px;border-radius:4px;cursor:pointer}
     .pagination button.active{background:#333;color:#fff}
 
-    /* 모바일: 바텀시트(스와이프) + 전체 스크롤 */
+    /* 모바일: 바텀시트(스와이프) */
     @media (max-width: 767px){
       .list{
         position:fixed;left:0;right:0;bottom:0;z-index:9998;max-height:80vh;height:50vh;border-radius:16px 16px 0 0;
@@ -99,7 +79,7 @@
       .handle{width:44px;height:5px;border-radius:999px;background:#d1d5db;margin:10px auto 6px;cursor:grab}
       .pagination{display:none}
     }
-    /* 데스크톱: 지도 아래 고정(높이에 따라 per-page 계산) */
+    /* 데스크톱: 고정 목록 */
     @media (min-width: 768px){
       .list{position:static;transform:none!important;height:clamp(220px, 32vh, 560px);max-height:none}
       .handle{display:none}
@@ -114,12 +94,14 @@
       width:min(640px, 92vw);max-height:86vh;overflow:auto;background:#fff;border-radius:18px;
       box-shadow:0 24px 60px rgba(0,0,0,.25)
     }
-    .m-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line)}
+    .m-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line);gap:8px}
+    .m-head-right{display:flex;gap:8px;align-items:center}
     .points{font-weight:800;font-size:18px;background:#ffe8ec;color:#b91c1c;border-radius:999px;padding:6px 12px;display:inline-flex;align-items:center;gap:6px}
     .points.disabled{background:#f3f4f6;color:#9ca3af;filter:grayscale(1)}
     .title-row{display:flex;align-items:center;gap:8px;font-weight:800}
     .pill-done{font-size:12px;color:#065f46;background:#d1fae5;border:1px solid #a7f3d0;border-radius:999px;padding:3px 8px}
     .close{border:0;background:#f3f4f6;border-radius:10px;width:36px;height:36px;cursor:pointer}
+    .solve-btn{border:1px solid #111;background:#111;color:#fff;border-radius:10px;height:36px;padding:0 12px;cursor:pointer;font-weight:700}
     .m-body{padding:10px 16px 18px}
     .section{margin-top:10px}
     .label{font-weight:700;margin:10px 0 6px}
@@ -127,7 +109,7 @@
     .comment{color:#374151;margin-top:6px;line-height:1.5}
     .meta{color:var(--muted);font-size:12px;margin-top:4px}
 
-    /* ====== 액션 모달(신고/해결) ====== */
+    /* ====== 액션 모달(신고/해결 전용 모드) ====== */
     .action-modal{position:fixed;inset:0;z-index:13000;display:none}
     .action-modal.open{display:block}
     .action-modal .overlay{position:absolute;inset:0;background:rgba(0,0,0,.45)}
@@ -137,10 +119,8 @@
       box-shadow:0 24px 60px rgba(0,0,0,.25)
     }
     .a-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line)}
-    .seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px}
-    .seg button{padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;font-weight:700}
-    .seg button.active{background:#fef2f2;border-color:#fecaca;color:#b91c1c}
-    .a-body{padding:0 14px 16px}
+    .a-title{font-weight:800}
+    .a-body{padding:12px 14px 16px}
     .field{display:grid;gap:6px;margin:12px 0}
     .field label{font-weight:700}
     .uploader{display:grid;gap:10px}
@@ -165,8 +145,8 @@
     </div>
   </div>
 
-  <!-- 우상단 사이렌 버튼 -->
-  <button class="fab" id="fab" aria-label="신고/해결">
+  <!-- 우상단 사이렌 버튼 (신고 전용) -->
+  <button class="fab" id="fab" aria-label="신고하기">
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path d="M7 11V9a5 5 0 0 1 10 0v2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
       <rect x="4" y="11" width="16" height="7" rx="2" fill="rgba(255,255,255,.15)" stroke="#fff" stroke-width="1.6"/>
@@ -180,7 +160,10 @@
     <div class="sheet" role="document">
       <div class="m-head">
         <div class="points" id="mPoints">200p</div>
-        <button class="close" id="modalClose" aria-label="닫기">✕</button>
+        <div class="m-head-right">
+          <button class="solve-btn" id="solveBtn">해결하기</button>
+          <button class="close" id="modalClose" aria-label="닫기">✕</button>
+        </div>
       </div>
       <div class="m-body">
         <div class="title-row">
@@ -204,19 +187,13 @@
     </div>
   </div>
 
-  <!-- ====== 액션 모달 (FAB 클릭) ====== -->
+  <!-- ====== 액션 모달 (모드별 단일 폼: 신고 OR 해결) ====== -->
   <div class="action-modal" id="actionModal" aria-modal="true" role="dialog">
     <div class="overlay" id="actionOverlay"></div>
     <div class="sheet" role="document">
       <div class="a-head">
-        <strong>신고/해결</strong>
+        <strong class="a-title" id="actionTitle">신고하기</strong>
         <button class="close" id="actionClose" aria-label="닫기">✕</button>
-      </div>
-
-      <!-- 상단 선택 버튼 -->
-      <div class="seg">
-        <button id="btnReportTab" class="active">신고하기</button>
-        <button id="btnResolveTab">해결하기</button>
       </div>
 
       <!-- 신고 폼 -->
@@ -260,7 +237,7 @@
   </div>
 
   <script>
-    /************ 샘플 데이터(춘천 5곳) ************/
+    /************ 데이터(춘천 5곳) ************/
     const data = [
       { id:1, title:"쓰레기 신고", addr:"춘천시 중앙로 67 (명동 일대)", lat:37.8813, lng:127.7300,
         reporter:"김민수", points:200, reportImg:"https://picsum.photos/seed/report1/960/540",
@@ -281,7 +258,7 @@
         reportComment:"산책로 옆에 서랍장 방치", resolved:false }
     ];
 
-    /************ 목록: 웹/앱 대응 (이전 로직 유지) ************/
+    /************ 목록: 웹/앱 대응 ************/
     let currentPage = 1;
     let itemsPerPage = 2;
     const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
@@ -351,81 +328,88 @@
       resolveComment: document.getElementById('mResolveComment'),
       overlay: document.getElementById('modalOverlay'),
       closeBtn: document.getElementById('modalClose'),
+      solveBtn: document.getElementById('solveBtn'),
+      currentItem: null
     };
     function openDetailModal(item){
-      detail.points.textContent = `${item.points}p`;
+      detail.currentItem = item;
+      detail.points.textContent = item.points + 'p';
       detail.points.classList.toggle('disabled', !!item.resolved);
-      detail.reporter.textContent = `${item.reporter}님의 신고`;
+      detail.reporter.textContent = item.reporter + '님의 신고';
       detail.done.style.display = item.resolved ? 'inline-flex' : 'none';
       detail.addr.textContent = item.addr;
       detail.reportImg.src = item.reportImg;
-      detail.reportImg.alt = `${item.reporter} 신고 사진`;
+      detail.reportImg.alt = item.reporter + ' 신고 사진';
       detail.reportComment.textContent = item.reportComment || '';
       if (item.resolved){
         detail.resolveSection.style.display = '';
-        detail.resolver.textContent = `${item.resolver || '누군가'}님의 해결`;
+        detail.resolver.textContent = (item.resolver || '누군가') + '님의 해결';
         detail.resolveImg.src = item.resolveImg || 'https://picsum.photos/seed/resolve_default/960/540';
-        detail.resolveImg.alt = `${item.resolver || '누군가'} 해결 사진`;
+        detail.resolveImg.alt = (item.resolver || '누군가') + ' 해결 사진';
         detail.resolveComment.textContent = item.resolveComment || '';
-      }else{
+      } else {
         detail.resolveSection.style.display = 'none';
       }
       detail.el.classList.add('open');
       document.documentElement.style.overflow='hidden';
     }
-    function closeDetailModal(){
-      detail.el.classList.remove('open');
-      document.documentElement.style.overflow='';
-    }
+    function closeDetailModal(){ detail.el.classList.remove('open'); document.documentElement.style.overflow=''; }
     detail.overlay.onclick = closeDetailModal;
     detail.closeBtn.onclick = closeDetailModal;
+
+    // 상세 모달 우상단 "해결하기" → 해결 모드로 액션 모달 열기
+    detail.solveBtn.onclick = function(){
+      openActionModal('resolve', detail.currentItem);
+    };
     window.addEventListener('keydown',(e)=>{ if(e.key==='Escape') closeDetailModal(); });
 
-    /************ 액션 모달(FAB 클릭 → 신고/해결) ************/
+    /************ 액션 모달 (신고/해결 단일 모드) ************/
     const action = {
       el: document.getElementById('actionModal'),
       overlay: document.getElementById('actionOverlay'),
       closeBtn: document.getElementById('actionClose'),
-      reportTabBtn: document.getElementById('btnReportTab'),
-      resolveTabBtn: document.getElementById('btnResolveTab'),
-      reportForm: document.getElementById('reportForm'),
-      resolveForm: document.getElementById('resolveForm'),
+      title: document.getElementById('actionTitle'),
       // 신고
+      reportForm: document.getElementById('reportForm'),
       reportFile: document.getElementById('reportFile'),
       reportPreview: document.getElementById('reportPreview'),
       reportDesc: document.getElementById('reportDesc'),
       reportSubmit: document.getElementById('reportSubmit'),
       reportCancel: document.getElementById('reportCancel'),
       // 해결
+      resolveForm: document.getElementById('resolveForm'),
       resolveFile: document.getElementById('resolveFile'),
       resolvePreview: document.getElementById('resolvePreview'),
       resolveDesc: document.getElementById('resolveDesc'),
       resolveSubmit: document.getElementById('resolveSubmit'),
       resolveCancel: document.getElementById('resolveCancel'),
-      rewardPoints: 200
+      rewardPoints: 200,
+      mode: 'report',
+      targetItem: null
     };
-    function openActionModal(mode='report'){
+
+    function openActionModal(mode='report', item=null){
+      action.mode = mode;
+      action.targetItem = item;
+      // 타이틀/보이는 폼 전환
+      if(mode==='report'){
+        action.title.textContent = '신고하기';
+        action.reportForm.style.display = '';
+        action.resolveForm.style.display = 'none';
+      }else{
+        action.title.textContent = '해결하기';
+        action.reportForm.style.display = 'none';
+        action.resolveForm.style.display = '';
+      }
       action.el.classList.add('open');
       document.documentElement.style.overflow='hidden';
-      setActionMode(mode);
     }
-    function closeActionModal(){
-      action.el.classList.remove('open');
-      document.documentElement.style.overflow='';
-    }
-    function setActionMode(mode){
-      const reportActive = (mode==='report');
-      action.reportForm.style.display = reportActive ? '' : 'none';
-      action.resolveForm.style.display = reportActive ? 'none' : '';
-      action.reportTabBtn.classList.toggle('active', reportActive);
-      action.resolveTabBtn.classList.toggle('active', !reportActive);
-    }
-    action.reportTabBtn.onclick = () => setActionMode('report');
-    action.resolveTabBtn.onclick = () => setActionMode('resolve');
-    document.getElementById('fab').onclick = () => openActionModal('report');
+    function closeActionModal(){ action.el.classList.remove('open'); document.documentElement.style.overflow=''; }
     action.overlay.onclick = closeActionModal;
     action.closeBtn.onclick = closeActionModal;
-    window.addEventListener('keydown',(e)=>{ if(e.key==='Escape') closeActionModal(); });
+
+    // FAB → 신고 모달
+    document.getElementById('fab').onclick = function(){ openActionModal('report'); };
 
     // 이미지 미리보기
     function bindPreview(inputEl, previewEl){
@@ -442,7 +426,12 @@
     // 제출
     action.reportSubmit.onclick = ()=>{ alert('신고가 완료되었습니다.'); closeActionModal(); };
     action.reportCancel.onclick = closeActionModal;
-    action.resolveSubmit.onclick = ()=>{ alert(`${action.rewardPoints}p를 받으셨습니다.`); closeActionModal(); };
+    action.resolveSubmit.onclick = ()=>{
+      alert(action.rewardPoints + 'p를 받으셨습니다.');
+      closeActionModal();
+      // 원하면 여기서 detail.currentItem.resolved = true 로 바꾸고 화면도 갱신 가능
+      // 예: if (action.targetItem) { action.targetItem.resolved = true; ...UI 갱신... }
+    };
     action.resolveCancel.onclick = closeActionModal;
 
     /************ 바텀시트 스와이프(앱에서만) ************/
