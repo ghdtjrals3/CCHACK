@@ -14,6 +14,7 @@
         <result property="practice_energy_saving" column="practice_energy_saving"/>
         <result property="residence_dong" column="residence_dong"/>
         <result property="workplace_or_school_dong" column="workplace_or_school_dong"/>
+        <result property="point" column="point"/>
     </resultMap>
 
 
@@ -41,6 +42,12 @@
         SELECT *
         FROM users
         WHERE user_id = #{user_id} AND user_pwd = #{user_pwd}
+    </select>
+
+    <select id="getUserInfo" parameterType="String" resultMap="UserMap">
+        SELECT *
+        FROM users
+        WHERE user_id = #{user_id}
     </select>
 
 
@@ -101,7 +108,7 @@
 	<delete id="deleteNoticeInfo" parameterType="NoticeDTO">
 		DELETE FROM NOTICE
 		WHERE NOTICE_SEQ = #{noticeSeq}
-			
+
 	</delete>
 			
 </mapper>

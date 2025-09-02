@@ -31,5 +31,7 @@ public class UserDTO {
     private String residence_dong; // 거주 행정동
     private String workplace_or_school_dong; // 직장/ 학교 행정동
 
+    private String point;
+
 }
 

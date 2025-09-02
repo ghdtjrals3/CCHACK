@@ -51,7 +51,6 @@ public class UserController {
 
     //로그인 처리
     @PostMapping(value = "loginProc")
-    @ResponseBody
     public String loginProc(HttpSession session, ModelMap model, HttpServletRequest request) throws Exception {
         log.info(this.getClass().getName() + ".loginProc Start!");
 
@@ -67,8 +66,16 @@ public class UserController {
 
         session.setAttribute("user_id", user_id);
 
+        uDTO = null;
+
+        uDTO = userService.getUserInfo(user_id);
+
+        log.info("user_id : " + uDTO.getUser_id());
+        log.info("test point : " + uDTO.getPoint());
+        model.addAttribute("uDTO", uDTO);
+
         log.info(this.getClass().getName() + ".loginProc End!");
-        return result;
+        return "index";
     }
 
     //회원가입처리
