@@ -241,30 +241,32 @@
 <script src="https://cdn.jsdelivr.net/npm/exifr/dist/lite.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exifr/dist/exifr.umd.js" defer></script>
 
-<script>
+<script th:inline="javascript">
     /************ 데이터(춘천 5곳) — 새 스키마 ************/
-    const data = [
-        { report_id:1, title:"쓰레기 신고", addr:"춘천시 중앙로 67 (명동 일대)", lat:37.8813, lng:127.7300,
-            reporter_id:"김민수", points:200, image_url:"https://picsum.photos/seed/report1/960/540",
-            description:"성원초 앞에 종량제 봉투가 터져있음", status:false, resolver_id:null,
-            proof_image_url:null, note:null },
-        { report_id:2, title:"방치된 쓰레기", addr:"춘천시 석사동 강원대학교 정문", lat:37.874, lng:127.744,
-            reporter_id:"박지영", points:150, image_url:"https://picsum.photos/seed/report2/960/540",
-            description:"정문 앞 화단에 페트병과 일회용컵 다수", status:true, resolver_id:"이도현",
-            proof_image_url:"https://picsum.photos/seed/resolve2/960/540", note:"분리수거 후 남은 잔여물 수거 완료" },
-        { report_id:3, title:"불법투기 의심", addr:"춘천시 후평동 후평시장", lat:37.892, lng:127.744,
-            reporter_id:"장하늘", points:120, image_url:"https://picsum.photos/seed/report3/960/540",
-            description:"폐지더미에 일반쓰레기 섞여 있음", status:false, resolver_id:null,
-            proof_image_url:null, note:null },
-        { report_id:4, title:"생활폐기물 신고", addr:"춘천시 퇴계동 홈플러스 근처", lat:37.862, lng:127.723,
-            reporter_id:"윤서연", points:300, image_url:"https://picsum.photos/seed/report4/960/540",
-            description:"가로변에 대형폐기물(의자) 방치", status:true, resolver_id:"최재훈",
-            proof_image_url:"https://picsum.photos/seed/resolve4/960/540", note:"대형폐기물 스티커 구매 후 배출" },
-        { report_id:5, title:"방치된 폐가구", addr:"춘천시 온의동 의암호 공원", lat:37.889, lng:127.716,
-            reporter_id:"오수진", points:180, image_url:"https://picsum.photos/seed/report5/960/540",
-            description:"산책로 옆에 서랍장 방치", status:false, resolver_id:null,
-            proof_image_url:null, note:null },
-    ];
+    // const data = [
+    //     { report_id:1, title:"쓰레기 신고", addr:"춘천시 중앙로 67 (명동 일대)", lat:37.8813, lng:127.7300,
+    //         reporter_id:"김민수", points:200, image_url:"https://picsum.photos/seed/report1/960/540",
+    //         description:"성원초 앞에 종량제 봉투가 터져있음", status:false, resolver_id:null,
+    //         proof_image_url:null, note:null },
+    //     { report_id:2, title:"방치된 쓰레기", addr:"춘천시 석사동 강원대학교 정문", lat:37.874, lng:127.744,
+    //         reporter_id:"박지영", points:150, image_url:"https://picsum.photos/seed/report2/960/540",
+    //         description:"정문 앞 화단에 페트병과 일회용컵 다수", status:true, resolver_id:"이도현",
+    //         proof_image_url:"https://picsum.photos/seed/resolve2/960/540", note:"분리수거 후 남은 잔여물 수거 완료" },
+    //     { report_id:3, title:"불법투기 의심", addr:"춘천시 후평동 후평시장", lat:37.892, lng:127.744,
+    //         reporter_id:"장하늘", points:120, image_url:"https://picsum.photos/seed/report3/960/540",
+    //         description:"폐지더미에 일반쓰레기 섞여 있음", status:false, resolver_id:null,
+    //         proof_image_url:null, note:null },
+    //     { report_id:4, title:"생활폐기물 신고", addr:"춘천시 퇴계동 홈플러스 근처", lat:37.862, lng:127.723,
+    //         reporter_id:"윤서연", points:300, image_url:"https://picsum.photos/seed/report4/960/540",
+    //         description:"가로변에 대형폐기물(의자) 방치", status:true, resolver_id:"최재훈",
+    //         proof_image_url:"https://picsum.photos/seed/resolve4/960/540", note:"대형폐기물 스티커 구매 후 배출" },
+    //     { report_id:5, title:"방치된 폐가구", addr:"춘천시 온의동 의암호 공원", lat:37.889, lng:127.716,
+    //         reporter_id:"오수진", points:180, image_url:"https://picsum.photos/seed/report5/960/540",
+    //         description:"산책로 옆에 서랍장 방치", status:false, resolver_id:null,
+    //         proof_image_url:null, note:null }
+    // ];
+    const data =  [[${rList}]];
+    console.log(data);
 
     /************ 목록: 웹/앱 대응 ************/
     let currentPage = 1;
@@ -614,6 +616,6 @@
         var report_id = document.getElementById("report_id_sibal").value;
         console.log("report_id입니다. : " + report_id);
     }
-</script>
+</script
 </body>
 </html>

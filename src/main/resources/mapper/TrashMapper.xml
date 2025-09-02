@@ -4,6 +4,34 @@
 <!-- JAVA와 연결할 Mapper 파일 설정 -->
 <mapper namespace="kopo.poly.mapper.ITrashMapper">
 
+
+
+    <!-- ReportCreDTO에 대한 명시 매핑 -->
+    <resultMap id="ReportCreMap"
+               type="kopo.poly.dto.ReportCreDTO"
+               autoMapping="false">
+        <!-- PK -->
+        <id     column="report_id"        property="report_id"/>
+
+        <!-- 기본 필드들 -->
+        <result column="reporter_id"      property="reporter_id"/>
+        <result column="description"      property="description"/>
+        <result column="image_url"        property="image_url"/>
+        <result column="lat"              property="lat"         jdbcType="DOUBLE"/>
+        <result column="lng"              property="lng"         jdbcType="DOUBLE"/>
+        <result column="status"           property="status"/>
+        <result column="title"            property="title"/>
+        <result column="point"            property="point"/>
+
+        <!-- 시간/추가 필드 -->
+        <result column="created_at"       property="created_at"  jdbcType="TIMESTAMP"/>
+        <result column="updated_at"       property="updated_at"  jdbcType="TIMESTAMP"/>
+        <result column="resolver_id"      property="resolver_id"/>
+        <result column="note"             property="note"/>
+        <result column="proof_image_url"  property="proof_image_url"/>
+        <result column="solved_at"        property="solved_at"   jdbcType="TIMESTAMP"/>
+    </resultMap>
+
     <insert id="reportProc" parameterType="ReportCreDTO">
         INSERT INTO trash_report
         (
@@ -53,7 +81,7 @@
         WHERE resolver_id = #{resolver_id}
     </select>
 
-    <select id="selectAllTrash" resultType="ReportCreDTO">
+    <select id="selectAllTrash" resultMap="ReportCreMap">
         SELECT * FROM trash_report
     </select>
 

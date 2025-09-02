@@ -62,7 +62,6 @@ public class TrashController {
 
         SolutionDTO sDTO = new SolutionDTO();
         sDTO.setSolution_id(Long.valueOf(request.getParameter("reporter_id")));
-        sDTO.setReport_id(Long.valueOf(request.getParameter("category")));
         sDTO.setResolver_id(CmmUtil.nvl(request.getParameter("resolver_id")));
         sDTO.setResult(CmmUtil.nvl(request.getParameter("residence_dong")));
         sDTO.setNote(CmmUtil.nvl(request.getParameter("description")));
@@ -81,6 +80,13 @@ public class TrashController {
 
         ReportCreDTO rDTO = new ReportCreDTO();
         List<ReportCreDTO> rList = trashService.selectAllTrash();
+
+        model.addAttribute("rList",rList);
+
+        for(ReportCreDTO rDTO2 : rList){
+            log.info(rDTO2.getReport_id() + "");
+            log.info(rDTO2.getReporter_id() + "");
+        }
 
         log.info("size : " + rList.size());
 
