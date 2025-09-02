@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>쓰레기 해결 • Kakao Map (춘천)</title>
 
-  <!-- Live Server일 때 (루트가 / 인 경우) -->
+  <!-- Live Server일 때 -->
   <script src="/js/config.local.js"></script>
-  <!-- Spring Boot로 구동 시 정적 루트가 /static 이면 경로를 /js/config.local.js 로 유지하세요 -->
+  <!-- Spring Boot로 구동 시 ↑를 /js/config.local.js 로 바꾸세요 -->
 
   <!-- Kakao SDK 동적 로더 (한 번만 초기화) -->
   <script>
@@ -235,13 +235,27 @@
       </div>
     </div>
   </div>
-
-  <!-- EXIF (lite는 위에서, full은 아래 defer로) -->
   <script src="https://cdn.jsdelivr.net/npm/exifr/dist/lite.umd.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/exifr/dist/exifr.umd.js" defer></script>
-
   <script>
-    /************ 데이터(춘천 5곳) — 새 스키마 ************/
+
+    /*
+    타임리프에서 변수 꺼내쓰는법 찾기
+    ex) 데이터베이스 데이터 / html 데이터
+    report_id = id
+    reporter_id = reporter
+    title = title
+    lat = lat
+    lng = lng
+    status = resolved
+    description = reportComment
+    points = points
+    image_url = reportImg
+    resolver_id = resolver
+    note = resolveComment
+    proof_image_url = resolveImg
+     */
+
+    /************ 데이터(춘천 5곳) ************/
     const data = [
       { report_id:1, title:"쓰레기 신고", addr:"춘천시 중앙로 67 (명동 일대)", lat:37.8813, lng:127.7300,
         reporter_id:"김민수", points:200, image_url:"https://picsum.photos/seed/report1/960/540",
@@ -338,48 +352,29 @@
       solveBtn: document.getElementById('solveBtn'),
       currentItem: null
     };
-
     function openDetailModal(item){
       detail.currentItem = item;
-
-      // 상단 포인트
-      detail.points.textContent = `${item.points}p`;
-      detail.points.classList.toggle('disabled', !!item.status);
-
-      // 제목 / 주소
-      detail.reporter.textContent = `${item.reporter_id}님의 신고`;
+      detail.points.textContent = item.points + 'p';
+      detail.points.classList.toggle('disabled', !!item.resolved);
+      detail.reporter.textContent = item.reporter + '님의 신고';
+      detail.done.style.display = item.resolved ? 'inline-flex' : 'none';
       detail.addr.textContent = item.addr;
-
-      // 신고 섹션 (항상 표시)
-      detail.reportImg.src = item.image_url;
-      detail.reportImg.alt = `${item.reporter_id} 신고 사진`;
-      detail.reportComment.textContent = item.description || '';
-
-      // 해결 상태 분기
-      if (item.status === true) {
-        // 해결완료 Pill 표시
-        detail.done.style.display = 'inline-flex';
-
-        // 해결 섹션 표시 + 내용 채우기
+      detail.reportImg.src = item.reportImg;
+      detail.reportImg.alt = item.reporter + ' 신고 사진';
+      detail.reportComment.textContent = item.reportComment || '';
+      if (item.resolved){
         detail.resolveSection.style.display = '';
-        detail.resolver.textContent = `${item.resolver_id || '누군가'}님의 해결`;
-        detail.resolveImg.src = item.proof_image_url || 'https://picsum.photos/seed/resolve_default/960/540';
-        detail.resolveImg.alt = `${item.resolver_id || '누군가'} 해결 사진`;
-        detail.resolveComment.textContent = item.note || '';
+        detail.resolver.textContent = (item.resolver || '누군가') + '님의 해결';
+        detail.resolveImg.src = item.resolveImg || 'https://picsum.photos/seed/resolve_default/960/540';
+        detail.resolveImg.alt = (item.resolver || '누군가') + ' 해결 사진';
+        detail.resolveComment.textContent = item.resolveComment || '';
       } else {
-        // 미해결
-        detail.done.style.display = 'none';
         detail.resolveSection.style.display = 'none';
       }
-
       detail.el.classList.add('open');
       document.documentElement.style.overflow='hidden';
     }
-
-    function closeDetailModal(){
-      detail.el.classList.remove('open');
-      document.documentElement.style.overflow='';
-    }
+    function closeDetailModal(){ detail.el.classList.remove('open'); document.documentElement.style.overflow=''; }
     detail.overlay.onclick = closeDetailModal;
     detail.closeBtn.onclick = closeDetailModal;
 
@@ -399,6 +394,9 @@
       reportForm: document.getElementById('reportForm'),
       reportFile: document.getElementById('reportFile'),
       reportPreview: document.getElementById('reportPreview'),
+      reportDesc: document.getElementById('reportDesc'),
+      reportSubmit: document.getElementById('reportSubmit'),
+      reportCancel: document.getElementById('reportCancel'),
       // 해결
       resolveForm: document.getElementById('resolveForm'),
       resolveFile: document.getElementById('resolveFile'),
@@ -414,11 +412,12 @@
     function openActionModal(mode='report', item=null){
       action.mode = mode;
       action.targetItem = item;
+      // 타이틀/보이는 폼 전환
       if(mode==='report'){
         action.title.textContent = '신고하기';
         action.reportForm.style.display = '';
         action.resolveForm.style.display = 'none';
-      } else {
+      }else{
         action.title.textContent = '해결하기';
         action.reportForm.style.display = 'none';
         action.resolveForm.style.display = '';
@@ -426,17 +425,14 @@
       action.el.classList.add('open');
       document.documentElement.style.overflow='hidden';
     }
-    function closeActionModal(){
-      action.el.classList.remove('open');
-      document.documentElement.style.overflow='';
-    }
+    function closeActionModal(){ action.el.classList.remove('open'); document.documentElement.style.overflow=''; }
     action.overlay.onclick = closeActionModal;
     action.closeBtn.onclick = closeActionModal;
 
     // FAB → 신고 모달
     document.getElementById('fab').onclick = function(){ openActionModal('report'); };
 
-    // 이미지 미리보기 (신고 / 해결)
+    // 이미지 미리보기
     function bindPreview(inputEl, previewEl){
       inputEl.addEventListener('change', ()=>{
         const f = inputEl.files && inputEl.files[0];
@@ -445,21 +441,18 @@
         previewEl.innerHTML = `<img src="${url}" alt="preview">`;
       });
     }
+
+
     bindPreview(action.reportFile, action.reportPreview);
     bindPreview(action.resolveFile, action.resolvePreview);
 
-    // 해결 제출 (예시 동작)
+    // 제출
+    action.reportCancel.onclick = closeActionModal;
     action.resolveSubmit.onclick = ()=>{
       alert(action.rewardPoints + 'p를 받으셨습니다.');
       closeActionModal();
-      // (선택) 실제로 상태 변경/리렌더 하고 싶으면 아래 주석 해제:
-      // if (action.targetItem) {
-      //   action.targetItem.status = true;
-      //   action.targetItem.resolver_id = '나';
-      //   action.targetItem.proof_image_url = action.resolveFile.files[0] ? URL.createObjectURL(action.resolveFile.files[0]) : action.targetItem.proof_image_url;
-      //   action.targetItem.note = action.resolveDesc.value || '';
-      //   // 모달 열려있다면 갱신 반영을 위해 다시 openDetailModal(action.targetItem) 호출 가능
-      // }
+      // 원하면 여기서 detail.currentItem.resolved = true 로 바꾸고 화면도 갱신 가능
+      // 예: if (action.targetItem) { action.targetItem.resolved = true; ...UI 갱신... }
     };
     action.resolveCancel.onclick = closeActionModal;
 
@@ -490,24 +483,22 @@
     /************ 지도 마커 바인딩 ************/
     function bindMap(map){
       data.forEach((it)=>{
-        const marker = new kakao.maps.Marker({
-          position:new kakao.maps.LatLng(it.lat, it.lng),
-          map,
-          title: it.title
-        });
+        const marker = new kakao.maps.Marker({ position:new kakao.maps.LatLng(it.lat, it.lng), map, title: it.title });
         kakao.maps.event.addListener(marker, 'click', () => openDetailModal(it));
       });
     }
   </script>
 
+  <!-- EXIF 파서 (full) -->
+  <script src="https://cdn.jsdelivr.net/npm/exifr/dist/exifr.umd.js" defer></script>
+
   <!-- 필요하면 CSRF 메타가 이미 페이지에 있어야 합니다 -->
   <!-- <meta name="_csrf_header" content="X-CSRF-TOKEN">
   <meta name="_csrf"        content="..."> -->
   <script>
-      // 위치 추적(선택): 신고 시 위치 포함
       let LAT = null;
       let LON = null;
-      let LAST_TS = null;
+      let LAST_TS = null;   // (선택) 타임스탬프
 
       function success({ coords, timestamp }) {
           LAT = coords.latitude;
@@ -515,23 +506,31 @@
           LAST_TS = timestamp;
           console.log('업데이트:', LAT, LON, 'ts=', LAST_TS);
       }
-      function error(err) { console.warn('geo fail', err); }
+
+      function error(err) {
+          console.warn('geo fail', err);
+      }
 
       function getUserLocation() {
           if (!navigator.geolocation) {
               alert('위치 정보가 지원되지 않습니다.');
               return;
           }
+          // 연속 업데이트: 필요 없으면 clearWatch로 중지
           window._watchId = navigator.geolocation.watchPosition(
-              success, error, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+              success,
+              error,
+              { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
           );
       }
+
       function stopWatch() {
           if (window._watchId != null) {
               navigator.geolocation.clearWatch(window._watchId);
               window._watchId = null;
           }
       }
+
       getUserLocation();
 
       function getGeoOnce(opts = { enableHighAccuracy:true, timeout:15000, maximumAge:0 }) {
@@ -542,10 +541,11 @@
 
       async function reportCreate() {
           const descriptionEl = document.getElementById('description');
-          const fileInput     = document.getElementById('reportFile');
+          const fileInput     = document.getElementById('reportFile'); // id 일치
           const file          = fileInput?.files?.[0];
           if (!file) { alert('이미지를 선택해주세요.'); return; }
           const description = (descriptionEl?.value || '').trim();
+
 
           const fd = new FormData();
           fd.append('description', description);
@@ -558,11 +558,21 @@
           const csrfToken  = document.querySelector('meta[name="_csrf"]')?.content;
           if (csrfHeader && csrfToken) headers[csrfHeader] = csrfToken;
 
+          console.log('description :', description);
+          console.log('file       :', file);
+          console.log('lat        :', LAT);
+          console.log('lon        :', LON);
+
           const res = await fetch('/trash/reportCreate', { method:'POST', body:fd, headers });
           if (!res.ok) throw new Error(`서버 오류: ${res.status}`);
           alert('신고가 등록되었습니다.');
       }
-      window.reportCreate = reportCreate;
+      window.reportCreate = reportCreate; // onclick으로 호출한다면 유지
   </script>
+
+
+
+
+
 </body>
 </html>

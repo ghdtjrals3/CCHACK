@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>개인 미션 • 탄소중립</title>
+<style>
+  :root{
+    --bg:#0f1113; --card:#161a1e; --ink:#e7eaef; --muted:#9aa3ad; --line:#242a31;
+    --primary:#3aa0ff; --chip:#2a3037; --accent:#1f6feb; --ok:#00c2a8;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans KR",Segoe UI,Roboto,Apple SD Gothic Neo,sans-serif}
+  .safe{height:10px}
+
+  header{
+    position:sticky; top:0; z-index:10; backdrop-filter:saturate(1.2) blur(6px);
+    background:linear-gradient(180deg, rgba(15,17,19,.92), rgba(15,17,19,.6) 70%, transparent);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-top{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:12px 16px}
+  .brand{font-weight:800;letter-spacing:-.2px}
+  .spacer{flex:1}
+  .tabs{display:none; gap:12px}
+  .tabs a{color:var(--muted);text-decoration:none;padding:8px 10px;border-radius:10px}
+  .tabs a.active,.tabs a:hover{background:#1b2026;color:#fff}
+
+  .title-wrap{max-width:1100px;margin:8px auto 4px;padding:0 16px}
+  h1{margin:18px 0 2px;font-size:32px;line-height:1.25;letter-spacing:-.3px}
+  .subtitle{color:var(--muted);margin:0 0 12px}
+
+  .grid{max-width:1100px;margin:0 auto;padding:8px 16px 92px;display:grid;grid-template-columns:1fr;gap:16px}
+  @media (min-width:600px){ .grid{grid-template-columns:repeat(2,1fr)} }
+  @media (min-width:900px){ .grid{grid-template-columns:repeat(3,1fr)} }
+  @media (min-width:1200px){ .grid{grid-template-columns:repeat(4,1fr)} }
+
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:22px;
+    padding:18px 18px 16px; display:flex; flex-direction:column; gap:12px;
+    box-shadow:0 10px 24px rgba(0,0,0,.25); cursor:pointer;
+  }
+  .card:focus-visible{outline:2px solid #3b82f6; outline-offset:2px}
+  .card-head{display:flex;align-items:center;gap:12px}
+  .icon{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;
+        background:#20262d;border:1px solid #2a3139;font-size:24px}
+  .meta{color:var(--muted)}
+  .cta-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .points{color:var(--primary);font-weight:800;font-size:22px}
+
+  .bottom-nav{
+    position:fixed;left:0;right:0;bottom:0;z-index:20;background:#0f1113cc;backdrop-filter:blur(10px);
+    border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);
+  }
+  .bn-item{padding:10px 6px 12px;text-align:center;color:#95a2af;font-size:12px;text-decoration:none}
+  .bn-item .i{display:block;font-size:20px;margin-bottom:4px}
+  .bn-item.active{color:#fff}
+  @media (min-width:900px){ .bottom-nav{display:none} .tabs{display:flex} }
+
+  /* 공통 모달 */
+  .modal{position:fixed;inset:0;display:none;z-index:30}
+  .modal.open{display:block}
+  .overlay{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+  .sheet{
+    position:absolute;left:50%;transform:translateX(-50%);width:min(560px,92vw);
+    background:#11161b;border:1px solid var(--line);border-radius:20px;overflow:hidden;
+    box-shadow:0 22px 60px rgba(0,0,0,.45);
+  }
+  .sheet.center{top:50%;transform:translate(-50%,-50%)}
+  .m-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line)}
+  .m-title{font-weight:800}
+  .close{border:0;background:#1a2026;color:#d5dbe3;border-radius:10px;width:36px;height:36px;cursor:pointer}
+  .m-body{padding:14px 16px 18px;display:grid;gap:10px}
+  .row-actions{display:flex;gap:8px;justify-content:flex-end}
+  .btn{border:1px solid #334155;background:#1a2430;color:#e8edf3;border-radius:12px;padding:10px 12px;cursor:pointer}
+  .btn.primary{background:var(--ok);border-color:var(--ok);color:#082522;font-weight:800}
+
+  /* 업로드 시트 */
+  .drop{
+    position:relative;border:1px dashed #3a4654;border-radius:14px;min-height:180px;
+    display:grid;place-items:center;background:#0e1216;
+  }
+  .drop input{position:absolute;inset:0;opacity:0;cursor:pointer}
+  .preview{width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#0d1114;border:1px solid #2b333c;display:none}
+  .preview img{width:100%;height:100%;object-fit:cover}
+  textarea{
+    width:100%;padding:12px 12px 14px;background:#0f1419;border:1px solid #2b333c;border-radius:14px;
+    color:var(--ink);resize:vertical;min-height:90px;outline:none;
+  }
+
+  @media (max-width: 767px){
+    .sheet{bottom:0;border-radius:20px 20px 0 0;transform:translateX(-50%);max-height:86vh;overflow:auto}
+    .sheet.center{top:auto;transform:translateX(-50%)}
+  }
+</style>
+</head>
+<body>
+  <div class="safe"></div>
+  <header>
+    <nav class="nav-top">
+      <div class="brand">동구라미 온</div>
+      <div class="spacer"></div>
+      <div class="tabs">
+        <a href="#" class="active">미션</a>
+        <a href="#">지도</a>
+        <a href="#">참여</a>
+        <a href="#">센터</a>
+        <a href="#">정보</a>
+      </div>
+    </nav>
+  </header>
+
+  <div class="title-wrap">
+    <h1>보너스 포인트 받는<br/>미션 모아봤어요</h1>
+    <p class="subtitle">탄소중립 실천으로 포인트를 모아봐요</p>
+  </div>
+
+  <main class="grid" id="grid"></main>
+
+  <!-- 모바일 하단 내비 -->
+  <nav class="bottom-nav" aria-label="하단 내비게이션">
+    <a class="bn-item active" href="#"><span class="i">🏁</span>미션</a>
+    <a class="bn-item" href="#"><span class="i">🗺️</span>지도</a>
+    <a class="bn-item" href="#"><span class="i">🤝</span>참여</a>
+    <a class="bn-item" href="#"><span class="i">🏢</span>센터</a>
+    <a class="bn-item" href="#"><span class="i">ℹ️</span>정보</a>
+  </nav>
+
+  <!-- 미션 상세 모달 -->
+  <div class="modal" id="missionModal">
+    <div class="overlay" data-close="mission"></div>
+    <div class="sheet center" role="dialog" aria-modal="true">
+      <div class="m-head">
+        <div class="m-title" id="mTitle">미션 상세</div>
+        <button class="close" data-close="mission">✕</button>
+      </div>
+      <div class="m-body">
+        <div id="mMeta" class="meta"></div>
+        <div id="mDesc" style="color:#cfd6de"></div>
+        <div class="row-actions">
+          <button class="btn" data-close="mission">나중에</button>
+          <button class="btn primary" id="btnStart">도전하기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 업로드 모달 -->
+  <div class="modal" id="uploadModal">
+    <div class="overlay" data-close="upload"></div>
+    <div class="sheet" role="dialog" aria-modal="true">
+      <div class="m-head">
+        <div class="m-title"><span id="uMissionTitle">미션 인증</span></div>
+        <button class="close" data-close="upload">✕</button>
+      </div>
+      <div class="m-body">
+        <div class="points" id="uPoints">+ 50p</div>
+        <div class="drop" id="dropzone">
+          <input type="file" id="uFile" accept="image/*" capture="environment" />
+          <div class="hint">사진을 드래그하거나 탭해서 업로드</div>
+        </div>
+        <div class="preview" id="uPreview"><img alt="preview"/></div>
+        <textarea id="uMemo" placeholder="미션을 인증할 간단한 메모를 남겨주세요."></textarea>
+        <div class="row-actions">
+          <button class="btn" data-close="upload">취소</button>
+          <button class="btn primary" id="uSubmit">업로드하고 미션 완료하기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* 포인트/데이터 */
+const POINTS = { easy: 50, normal: 100, hard: 200 };
+const missions = [
+  { id:1, icon:"🚌", tag:"대중교통 타기", level:"easy",
+    title:"대중교통으로 출근하기", desc:"자가용 대신 버스/지하철로 출퇴근하면 탄소를 확 줄일 수 있어요." },
+  { id:2, icon:"🥤", tag:"일회용 안쓰기", level:"normal",
+    title:"일회용품 사용하지 않기", desc:"텀블러/리유저블 컵 사용으로 일회용 컵을 줄여요." },
+  { id:3, icon:"🛒", tag:"장바구니", level:"easy",
+    title:"장바구니 챙기기", desc:"마트/편의점에서 장바구니 사용으로 비닐봉투 줄이기." },
+  { id:4, icon:"🍚", tag:"음식물 줄이기", level:"normal",
+    title:"음식물 쓰레기 20% 줄이기", desc:"한 끼 양을 조절하고 남긴 음식 포장 대신 비우기 실천." },
+  { id:5, icon:"🚶", tag:"걷기", level:"easy",
+    title:"하루 1만 보 걷기", desc:"가까운 거리는 도보로 이동해요." },
+  { id:6, icon:"🔌", tag:"절전", level:"hard",
+    title:"콘센트 대기전력 차단", desc:"멀티탭 스위치를 꺼서 대기전력 절감하기." },
+  { id:7, icon:"🌳", tag:"나무심기", level:"hard",
+    title:"탄소중립 행사 참여", desc:"지역 환경 봉사/나무심기 행사 참가." },
+  { id:8, icon:"♻️", tag:"분리배출", level:"normal",
+    title:"정확한 분리배출 실천", desc:"재활용 분류표대로 꼼꼼히 분리하기." },
+];
+
+/* 렌더 */
+const grid = document.getElementById('grid');
+
+function renderCard(m){
+  const p = POINTS[m.level] || 50;
+  const el = document.createElement('div');
+  el.className = 'card';
+  el.tabIndex = 0; // 키보드 접근
+  el.setAttribute('aria-label', `${m.title} – ${p}p`);
+
+  el.innerHTML = `
+    <div class="card-head">
+      <div class="icon" aria-hidden="true">${m.icon}</div>
+      <div class="meta">${m.tag}</div>
+    </div>
+    <div class="cta-row">
+      <div class="points">+ ${p}p</div>
+      <!-- 버튼/구경중 제거 -->
+    </div>
+  `;
+
+  el.addEventListener('click', () => openMissionModal(m, p));
+  el.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); openMissionModal(m,p); }});
+  return el;
+}
+function render(){ grid.innerHTML=''; missions.forEach(m=>grid.appendChild(renderCard(m))); }
+render();
+
+/* 미션 상세 모달 → 도전하기 = 업로드 모달 */
+const missionModal = document.getElementById('missionModal');
+const mTitle = document.getElementById('mTitle');
+const mMeta = document.getElementById('mMeta');
+const mDesc = document.getElementById('mDesc');
+const btnStart = document.getElementById('btnStart');
+
+let currentMission=null, currentPoints=0;
+
+function openMissionModal(m,p){
+  currentMission=m; currentPoints=p;
+  mTitle.textContent=m.title;
+  mMeta.innerHTML=`<span class="meta">${m.tag}</span> <span class="points">+ ${p}p</span>`;
+  mDesc.textContent=m.desc;
+  missionModal.classList.add('open'); lockScroll(true);
+}
+function closeMissionModal(){ missionModal.classList.remove('open'); lockScroll(false); }
+document.querySelectorAll('[data-close="mission"]').forEach(el=>el.onclick=closeMissionModal);
+btnStart.onclick=()=>{ closeMissionModal(); openUploadModal(currentMission,currentPoints); };
+
+/* 업로드 모달 */
+const uploadModal=document.getElementById('uploadModal');
+const uTitle=document.getElementById('uMissionTitle');
+const uPoints=document.getElementById('uPoints');
+const uFile=document.getElementById('uFile');
+const uPreview=document.getElementById('uPreview');
+const uPreviewImg=uPreview.querySelector('img');
+const uMemo=document.getElementById('uMemo');
+const uSubmit=document.getElementById('uSubmit');
+const dropzone=document.getElementById('dropzone');
+
+function openUploadModal(m,p){
+  uTitle.textContent=m.title; uPoints.textContent=`+ ${p}p`;
+  uFile.value=''; uMemo.value=''; uPreview.style.display='none'; uPreviewImg.src='';
+  uploadModal.classList.add('open'); lockScroll(true);
+}
+function closeUploadModal(){ uploadModal.classList.remove('open'); lockScroll(false); }
+document.querySelectorAll('[data-close="upload"]').forEach(el=>el.onclick=closeUploadModal);
+
+uFile.addEventListener('change', ()=>{
+  const f=uFile.files && uFile.files[0];
+  if(!f){ uPreview.style.display='none'; uPreviewImg.src=''; return; }
+  const url=URL.createObjectURL(f); uPreviewImg.src=url; uPreview.style.display='block';
+});
+;['dragenter','dragover'].forEach(ev=>{
+  dropzone.addEventListener(ev, e=>{ e.preventDefault(); dropzone.style.borderColor='#4b5868'; });
+});
+;['dragleave','drop'].forEach(ev=>{
+  dropzone.addEventListener(ev, e=>{ e.preventDefault(); dropzone.style.borderColor='#3a4654'; });
+});
+dropzone.addEventListener('drop', e=>{
+  const f=e.dataTransfer.files && e.dataTransfer.files[0]; if(!f) return;
+  uFile.files=e.dataTransfer.files;
+  const url=URL.createObjectURL(f); uPreviewImg.src=url; uPreview.style.display='block';
+});
+uSubmit.onclick=()=>{ alert('업로드 완료! 포인트가 적립됩니다.'); closeUploadModal(); };
+
+/* 유틸 */
+function lockScroll(lock){ document.documentElement.style.overflow = lock ? 'hidden' : ''; }
+window.addEventListener('keydown',(e)=>{
+  if(e.key==='Escape'){
+    if(uploadModal.classList.contains('open')) closeUploadModal();
+    else if(missionModal.classList.contains('open')) closeMissionModal();
+  }
+});
+</script>
+</body>
+</html>
