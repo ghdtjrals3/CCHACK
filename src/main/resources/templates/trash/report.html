@@ -359,7 +359,7 @@
         detail.reportComment.textContent = item.description || '';
 
         // 해결 상태 분기
-        if (item.status === true) {
+        if (item.status === 'true') {
             // 해결완료 Pill 표시
             detail.done.style.display = 'inline-flex';
 
@@ -606,16 +606,36 @@
         const res = await fetch('/trash/reportCreate', { method:'POST', body:fd, headers });
         if (!res.ok) throw new Error(`서버 오류: ${res.status}`);
         alert('신고가 등록되었습니다.');
+        window.location.href = '/trash/reportPage';
     }
     window.reportCreate = reportCreate;
 </script>
 
 
-<script>
-    function solutionCreate() {
+<script th:inline="javascript">
+    async function solutionCreate() {
         var report_id = document.getElementById("report_id_sibal").value;
-        console.log("report_id입니다. : " + report_id);
+        var note = document.getElementById("resolveDesc").value;
+
+        const fileInput     = document.getElementById('resolveFile');
+        const file          = fileInput?.files?.[0];
+
+        const fd = new FormData();
+        fd.append('report_id', report_id);
+        fd.append('proof_image_url', file);
+        fd.append('note',  note);
+
+        const headers = {};
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+        const csrfToken  = document.querySelector('meta[name="_csrf"]')?.content;
+        if (csrfHeader && csrfToken) headers[csrfHeader] = csrfToken;
+
+        const res = await fetch('/trash/solutionCreate', { method:'POST', body:fd, headers });
+        if (!res.ok) throw new Error(`서버 오류: ${res.status}`);
+        alert('신고가 해결되었습니다.');
+        window.location.href = '/trash/reportPage';
+
     }
-</script
+</script>
 </body>
 </html>

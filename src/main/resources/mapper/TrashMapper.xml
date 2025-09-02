@@ -85,6 +85,12 @@
         SELECT * FROM trash_report
     </select>
 
+    <update id="reportSolution" parameterType="ReportCreDTO">
+        UPDATE trash_report
+        SET resolver_id = #{resolver_id}, note = #{note}, proof_image_url = #{proof_image_url}, solved_at = NOW(), status = 'true'
+        WHERE report_id = #{report_id}
+    </update>
+
 
 
 

@@ -11,7 +11,7 @@ import java.util.List;
 public interface ITrashMapper {
 
     int reportProc(ReportCreDTO rDTO) throws Exception;
-    int reportSolution(SolutionDTO sDTO) throws Exception;
+    int reportSolution(ReportCreDTO rDTO) throws Exception;
     int changeReportStatus(long report_id);
 
     List<ReportCreDTO> selectAllReports(String reporter_id) throws Exception;
