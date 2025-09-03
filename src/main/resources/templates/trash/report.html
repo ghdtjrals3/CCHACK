@@ -146,7 +146,7 @@
 </div>
 
 <!-- 우상단 사이렌 버튼 (신고 전용) -->
-<button class="fab" id="fab" aria-label="신고하기">
+<button class="fab" id="fab" aria-label="신고하기" th:unless="${#strings.isEmpty(session.user_id)}">
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path d="M7 11V9a5 5 0 0 1 10 0v2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
         <rect x="4" y="11" width="16" height="7" rx="2" fill="rgba(255,255,255,.15)" stroke="#fff" stroke-width="1.6"/>
@@ -161,7 +161,7 @@
         <div class="m-head">
             <div class="points" id="mPoints">200p</div>
             <div class="m-head-right">
-                <button class="solve-btn" id="solveBtn">해결하기</button>
+                <button class="solve-btn" id="solveBtn" th:unless="${#strings.isEmpty(session.user_id)}">해결하기</button>
                 <button class="close" id="modalClose" aria-label="닫기">✕</button>
             </div>
         </div>
@@ -198,6 +198,22 @@
 
         <!-- 신고 폼 -->
         <div class="a-body" id="reportForm">
+
+            <div class="field">
+                <label for="reportType">제목</label>
+                <select id="reportType" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;">
+                    <option value="">선택하세요</option>
+                    <option value="smoke">담배꽁초/작은쓰레기</option>
+                    <option value="can">캔/병/플라스틱(소량)</option>
+                    <option value="smallWaste">일반생활쓰레기(소형봉투)</option>
+                    <option value="mixedWaste">혼합쓰레기(봉투 외)</option>
+                    <option value="foodWaste">음식물쓰레기 유출</option>
+                    <option value="illegalFurniture">불법투기 가구(스티커 없음)</option>
+                    <option value="constructionWaste">건설폐기물/대형폐기물</option>
+                    <option value="hazardous">위험물(날카로운 물건 등)</option>
+                </select>
+            </div>
+
             <div class="field">
                 <label for="reportFile">신고 사진</label>
                 <div class="uploader">
@@ -359,9 +375,10 @@
         detail.reportComment.textContent = item.description || '';
 
         // 해결 상태 분기
-        if (item.status === true) {
+        if (item.status === 'true') {
             // 해결완료 Pill 표시
             detail.done.style.display = 'inline-flex';
+            document.getElementById("solveBtn").style.display = 'none';
 
             // 해결 섹션 표시 + 내용 채우기
             detail.resolveSection.style.display = '';
@@ -373,6 +390,7 @@
             // 미해결
             detail.done.style.display = 'none';
             detail.resolveSection.style.display = 'none';
+            document.getElementById("solveBtn").style.display = 'block';
         }
 
         detail.el.classList.add('open');
@@ -589,7 +607,7 @@
         const file          = fileInput?.files?.[0];
         if (!file) { alert('이미지를 선택해주세요.'); return; }
         const description = (descriptionEl?.value || '').trim();
-        const title = document.getElementById("title");
+        const title = document.getElementById("reportType").options[document.getElementById("reportType").selectedIndex].text;
 
         const fd = new FormData();
         fd.append('description', description);
@@ -606,16 +624,36 @@
         const res = await fetch('/trash/reportCreate', { method:'POST', body:fd, headers });
         if (!res.ok) throw new Error(`서버 오류: ${res.status}`);
         alert('신고가 등록되었습니다.');
+        window.location.href = '/trash/reportPage';
     }
     window.reportCreate = reportCreate;
 </script>
 
 
-<script>
-    function solutionCreate() {
+<script th:inline="javascript">
+    async function solutionCreate() {
         var report_id = document.getElementById("report_id_sibal").value;
-        console.log("report_id입니다. : " + report_id);
+        var note = document.getElementById("resolveDesc").value;
+
+        const fileInput     = document.getElementById('resolveFile');
+        const file          = fileInput?.files?.[0];
+
+        const fd = new FormData();
+        fd.append('report_id', report_id);
+        fd.append('proof_image_url', file);
+        fd.append('note',  note);
+
+        const headers = {};
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+        const csrfToken  = document.querySelector('meta[name="_csrf"]')?.content;
+        if (csrfHeader && csrfToken) headers[csrfHeader] = csrfToken;
+
+        const res = await fetch('/trash/solutionCreate', { method:'POST', body:fd, headers });
+        if (!res.ok) throw new Error(`서버 오류: ${res.status}`);
+        alert('신고가 해결되었습니다.');
+        window.location.href = '/trash/reportPage';
+
     }
-</script
+</script>
 </body>
 </html>

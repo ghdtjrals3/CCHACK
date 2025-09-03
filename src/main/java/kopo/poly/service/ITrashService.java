@@ -10,7 +10,11 @@ public interface ITrashService {
 
     int reportProc(ReportCreDTO rDTO, MultipartFile image) throws Exception;
 
-    int reportSolution(SolutionDTO sDTO, MultipartFile proof) throws Exception;
+    int reportSolution(ReportCreDTO rDTO, MultipartFile image) throws Exception;
 
     List<ReportCreDTO> selectAllTrash() throws Exception;
+
+    List<ReportCreDTO> selectAllReportById(String userId) throws Exception;
+
+    List<ReportCreDTO> selectAllSolutionById(String userId) throws Exception;
 }

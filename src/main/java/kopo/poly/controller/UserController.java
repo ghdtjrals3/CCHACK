@@ -2,7 +2,9 @@ package kopo.poly.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import kopo.poly.dto.ReportCreDTO;
 import kopo.poly.dto.UserDTO;
+import kopo.poly.service.ITrashService;
 import kopo.poly.service.IUserService;
 import kopo.poly.util.CmmUtil;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.List;
 
 
 /*
@@ -31,6 +35,7 @@ public class UserController {
 
     // @RequiredArgsConstructor 를 통해 메모리에 올라간 서비스 객체를 Controller에서 사용할 수 있게 주입함
     private final IUserService userService;
+    private final ITrashService trashService;
 
     /**
      * 게시판 리스트 보여주기
@@ -155,6 +160,37 @@ public class UserController {
 
     @GetMapping(value = "myPage")
     public String myPage(HttpSession session, ModelMap model, HttpServletRequest request) throws Exception {
+        log.info(this.getClass().getName() + "myPage Start!");
+
+        String user_id = CmmUtil.nvl((String) session.getAttribute("user_id"));
+
+        List<ReportCreDTO> rList = trashService.selectAllReportById(user_id);
+        List<ReportCreDTO> sList = trashService.selectAllSolutionById(user_id);
+
+
+        for(ReportCreDTO reportCreDTO : rList) {
+            log.info("repoter_id : " + reportCreDTO.getReporter_id());
+            log.info("title : " + reportCreDTO.getTitle());
+
+
+            log.info("---------------------");
+        }
+
+
+        for(ReportCreDTO reportCreDTO : sList) {
+            log.info("resolver_id : " + reportCreDTO.getResolver_id());
+            log.info("status : " + reportCreDTO.getStatus());
+        }
+
+        log.info(this.getClass().getName() + "myPage End!");
         return "user/myPage";
+    }
+
+    @GetMapping(value = "logOut")
+    public String logOut(HttpSession session) throws Exception {
+        log.info(this.getClass().getName() + "logOut Start!");
+        session.invalidate();
+        log.info(this.getClass().getName() + "logOut End!");
+        return "index";
     }
 }

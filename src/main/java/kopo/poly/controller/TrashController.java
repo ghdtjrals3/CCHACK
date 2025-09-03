@@ -55,46 +55,51 @@ public class TrashController {
         return "/trash/report";
     }
 
-    @PostMapping(value="solution", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @ResponseBody
-    public String reportSolution(HttpSession session, ModelMap map, HttpServletRequest request,  @RequestParam(required=false, name="proof") MultipartFile proof) throws Exception{
+    @PostMapping(value="solutionCreate", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public String reportSolution(HttpSession session, ModelMap map, HttpServletRequest request,  @RequestParam(required=false, name="proof_image_url") MultipartFile proof) throws Exception{
         log.info(this.getClass().getName() + " reportSolution Start!!");
 
-        SolutionDTO sDTO = new SolutionDTO();
-        sDTO.setSolution_id(Long.valueOf(request.getParameter("reporter_id")));
-        sDTO.setResolver_id(CmmUtil.nvl(request.getParameter("resolver_id")));
-        sDTO.setResult(CmmUtil.nvl(request.getParameter("residence_dong")));
-        sDTO.setNote(CmmUtil.nvl(request.getParameter("description")));
-        sDTO.setProof_image_url(CmmUtil.nvl(request.getParameter("description")));
+        ReportCreDTO rDTO = new ReportCreDTO();
+        rDTO.setNote(request.getParameter("note"));
+        rDTO.setReport_id(Long.valueOf(request.getParameter("report_id")));
 
-        int result = trashService.reportSolution(sDTO, proof);
+
+        rDTO.setResolver_id(session.getAttribute("user_id").toString());
+
+        log.info(rDTO.getReport_id() + "");
+        log.info(rDTO.getResolver_id() + "");
+
+        trashService.reportSolution(rDTO,proof);
+
 
         log.info(this.getClass().getName() + " reportSolution End!!");
-        return "";
+        return "/trash/report";
     }
 
 
     @GetMapping(value = "reportPage")
-    public String reportPage(HttpSession session, ModelMap model) throws Exception{
-        log.info(this.getClass().getName() + " reportPage Start!!");
+public String reportPage(HttpSession session, Model model) throws Exception {
 
-        ReportCreDTO rDTO = new ReportCreDTO();
-        // List<ReportCreDTO> rList = trashService.selectAllTrash();
+    log.info(this.getClass().getName() + " reportPage Start!!");
 
-        // model.addAttribute("rList",rList);
+    ReportCreDTO rDTO = new ReportCreDTO();
+    List<ReportCreDTO> rList = trashService.selectAllTrash();
 
-        // for(ReportCreDTO rDTO2 : rList){
-        //     log.info(rDTO2.getReport_id() + "");
-        //     log.info(rDTO2.getReporter_id() + "");
-        // }
+    model.addAttribute("list", rList);
 
-        // log.info("size : " + rList.size());
-
-        log.info(this.getClass().getName() + " reportPage End!!");
-
-        return "/trash/report";
-
+    for (ReportCreDTO rDTO2 : rList) {
+        log.info("report_id : {}", rDTO2.getReport_id());
+        log.info("reporter_id : {}", rDTO2.getReporter_id());
     }
+
+    // 충돌난 부분을 이렇게 정리
+    log.info("size : {}", rList.size());
+    log.info("id : {}", CmmUtil.nvl((String) session.getAttribute("user_id")));
+
+    log.info(this.getClass().getName() + " reportPage End!!");
+
+    return "/trash/report";
+}
 
 
 

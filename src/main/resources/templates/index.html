@@ -248,7 +248,10 @@ a{text-decoration:none}
         <a th:if="${#strings.isEmpty(session.user_id)}" th:href="@{/user/login}">로그인</a>
 
         <!-- 로그인 후만 보이기 -->
-        <a th:unless="${#strings.isEmpty(session.user_id)}" th:href="@{/user/myPage}">내 정보</a>
+        <div>
+            <a th:unless="${#strings.isEmpty(session.user_id)}" th:href="@{/user/myPage}">내 정보 | </a>
+            <a th:unless="${#strings.isEmpty(session.user_id)}" th:href="@{/user/logOut}">로그아웃</a>
+        </div>
 
     </div>
   </header>

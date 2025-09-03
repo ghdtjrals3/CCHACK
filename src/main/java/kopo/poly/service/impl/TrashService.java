@@ -36,33 +36,21 @@ public class TrashService implements ITrashService {
             rDTO.setImage_url(url);
         }
 
-
-
         log.info(this.getClass().getName() + "TrashService.reportProc End!!");
         return trashMapper.reportProc(rDTO);
     }
 
     @Override
-    public int reportSolution(SolutionDTO sDTO, MultipartFile proof) throws Exception {
+    public int reportSolution(ReportCreDTO rDTO, MultipartFile image) throws Exception {
         log.info(this.getClass().getName() + "TrashService.reportSolution Start!!");
 
-        // 파일 저장 → URL 세팅
-        if (proof != null && !proof.isEmpty()) {
-            String url = CmmUtil.saveFile(proof, uploadDir, "solution"); // /uploads/solution/...
-            sDTO.setProof_image_url(url);
-        }
-
-        int result = trashMapper.reportSolution(sDTO);
-        int updateResult = 0;
-
-        if(result == 0){
-            return 0;
-        } else {
-            updateResult = trashMapper.changeReportStatus(sDTO.getReport_id());
+        if (image != null && !image.isEmpty()) {
+            String url = CmmUtil.saveFile(image, uploadDir, "solution"); // C:/uploads/report/ → /uploads/report/...
+            rDTO.setProof_image_url(url);
         }
 
         log.info(this.getClass().getName() + "TrashService.reportSolution End!!");
-        return updateResult;
+        return trashMapper.reportSolution(rDTO);
     }
 
     @Override
@@ -71,6 +59,20 @@ public class TrashService implements ITrashService {
         log.info(this.getClass().getName() + "selectAllTrash End!!");
 
         return trashMapper.selectAllTrash();
+    }
+
+    @Override
+    public List<ReportCreDTO> selectAllReportById(String userId) throws Exception {
+        log.info(this.getClass().getName() + "selectAllReportById Start!!");
+        log.info(this.getClass().getName() + "selectAllReportById End!!");
+        return trashMapper.selectAllReportById(userId);
+    }
+
+    @Override
+    public List<ReportCreDTO> selectAllSolutionById(String userId) throws Exception {
+        log.info(this.getClass().getName() + "selectAllSolutionById Start!!");
+        log.info(this.getClass().getName() + "selectAllSolutionById End!!");
+        return trashMapper.selectAllSolutionById(userId);
     }
 
 
