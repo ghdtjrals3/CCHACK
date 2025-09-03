@@ -157,4 +157,12 @@ public class UserController {
     public String myPage(HttpSession session, ModelMap model, HttpServletRequest request) throws Exception {
         return "user/myPage";
     }
+
+    @GetMapping(value = "logOut")
+    public String logOut(HttpSession session) throws Exception {
+        log.info(this.getClass().getName() + "logOut Start!");
+        session.invalidate();
+        log.info(this.getClass().getName() + "logOut End!");
+        return "index";
+    }
 }

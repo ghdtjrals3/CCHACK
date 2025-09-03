@@ -93,6 +93,8 @@ public class TrashController {
             log.info(rDTO2.getReporter_id() + "");
         }
 
+        log.info("id : " + CmmUtil.nvl((String) session.getAttribute("user_id")));
+
         log.info("size : " + rList.size());
 
         log.info(this.getClass().getName() + " reportPage End!!");
