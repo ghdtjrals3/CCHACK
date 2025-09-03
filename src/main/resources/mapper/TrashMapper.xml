@@ -63,23 +63,16 @@
         WHERE report_id = #{report_id}
     </update>
 
-    <insert id="" parameterType="SolutionDTO">
-        INSERT INTO trash_solution
-        (report_id, resolver_id, result, note, proof_image_url, solved_at)
-        VALUES
-            (#{report_id}, #{resolver_id}, #{result}, #{note},
-             #{proof_image_url}, NOW())
-    </insert>
-
-    <select id="selectAllReports" resultType="ReportCreDTO" parameterType="String">
+    <select id="selectAllReportById" resultMap="ReportCreMap" parameterType="String">
         SELECT * FROM trash_report
         WHERE reporter_id = #{reporter_id}
     </select>
 
-    <select id="selectAllSolutions" resultType="SolutionDTO" parameterType="String">
-        SELECT * FROM trash_solution
+    <select id="selectAllSolutionById" resultMap="ReportCreMap" parameterType="String">
+        SELECT * FROM trash_report
         WHERE resolver_id = #{resolver_id}
     </select>
+
 
     <select id="selectAllTrash" resultMap="ReportCreMap">
         SELECT * FROM trash_report

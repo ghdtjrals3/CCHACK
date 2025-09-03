@@ -14,8 +14,8 @@ public interface ITrashMapper {
     int reportSolution(ReportCreDTO rDTO) throws Exception;
     int changeReportStatus(long report_id);
 
-    List<ReportCreDTO> selectAllReports(String reporter_id) throws Exception;
-    List<SolutionDTO> selectAllSolutions(String resolver_id) throws Exception;
 
     List<ReportCreDTO> selectAllTrash() throws Exception;
+    List<ReportCreDTO> selectAllReportById(String user_id) throws Exception;
+    List<ReportCreDTO> selectAllSolutionById(String userId) throws Exception;
 }

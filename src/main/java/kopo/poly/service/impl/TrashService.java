@@ -61,5 +61,19 @@ public class TrashService implements ITrashService {
         return trashMapper.selectAllTrash();
     }
 
+    @Override
+    public List<ReportCreDTO> selectAllReportById(String userId) throws Exception {
+        log.info(this.getClass().getName() + "selectAllReportById Start!!");
+        log.info(this.getClass().getName() + "selectAllReportById End!!");
+        return trashMapper.selectAllReportById(userId);
+    }
+
+    @Override
+    public List<ReportCreDTO> selectAllSolutionById(String userId) throws Exception {
+        log.info(this.getClass().getName() + "selectAllSolutionById Start!!");
+        log.info(this.getClass().getName() + "selectAllSolutionById End!!");
+        return trashMapper.selectAllSolutionById(userId);
+    }
+
 
 }
