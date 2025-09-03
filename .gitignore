@@ -34,3 +34,4 @@ build/
 
 ### app key ###
 src/main/resources/static/js/config.local.js
+src/main/resources/config.local.properties

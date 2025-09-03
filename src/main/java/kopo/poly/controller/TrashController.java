@@ -78,30 +78,28 @@ public class TrashController {
 
 
     @GetMapping(value = "reportPage")
-    public String reportPage(HttpSession session, ModelMap model) throws Exception{
-        log.info(this.getClass().getName() + " reportPage Start!!");
+public String reportPage(HttpSession session, Model model) throws Exception {
 
+    log.info(this.getClass().getName() + " reportPage Start!!");
 
+    ReportCreDTO rDTO = new ReportCreDTO();
+    List<ReportCreDTO> rList = trashService.selectAllTrash();
 
-        ReportCreDTO rDTO = new ReportCreDTO();
-        List<ReportCreDTO> rList = trashService.selectAllTrash();
+    model.addAttribute("list", rList);
 
-        model.addAttribute("rList",rList);
-
-        for(ReportCreDTO rDTO2 : rList){
-            log.info(rDTO2.getReport_id() + "");
-            log.info(rDTO2.getReporter_id() + "");
-        }
-
-        log.info("id : " + CmmUtil.nvl((String) session.getAttribute("user_id")));
-
-        log.info("size : " + rList.size());
-
-        log.info(this.getClass().getName() + " reportPage End!!");
-
-        return "/trash/report";
-
+    for (ReportCreDTO rDTO2 : rList) {
+        log.info("report_id : {}", rDTO2.getReport_id());
+        log.info("reporter_id : {}", rDTO2.getReporter_id());
     }
+
+    // 충돌난 부분을 이렇게 정리
+    log.info("size : {}", rList.size());
+    log.info("id : {}", CmmUtil.nvl((String) session.getAttribute("user_id")));
+
+    log.info(this.getClass().getName() + " reportPage End!!");
+
+    return "/trash/report";
+}
 
 
 
