@@ -97,18 +97,18 @@ public String reportPage(HttpSession session, Model model) throws Exception {
     log.info(this.getClass().getName() + " reportPage Start!!");
 
     ReportCreDTO rDTO = new ReportCreDTO();
-    List<ReportCreDTO> rList = trashService.selectAllTrash();
+    // List<ReportCreDTO> rList = trashService.selectAllTrash();
 
-    model.addAttribute("rList", rList);
+    // model.addAttribute("rList", rList);
 
-    for (ReportCreDTO rDTO2 : rList) {
-        log.info("report_id : {}", rDTO2.getReport_id());
-        log.info("reporter_id : {}", rDTO2.getReporter_id());
-    }
+    // for (ReportCreDTO rDTO2 : rList) {
+    //     log.info("report_id : {}", rDTO2.getReport_id());
+    //     log.info("reporter_id : {}", rDTO2.getReporter_id());
+    // }
 
-    // 충돌난 부분을 이렇게 정리
-    log.info("size : {}", rList.size());
-    log.info("id : {}", CmmUtil.nvl((String) session.getAttribute("user_id")));
+    // // 충돌난 부분을 이렇게 정리
+    // log.info("size : {}", rList.size());
+    // log.info("id : {}", CmmUtil.nvl((String) session.getAttribute("user_id")));
 
     log.info(this.getClass().getName() + " reportPage End!!");
 
