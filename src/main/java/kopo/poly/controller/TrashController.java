@@ -79,16 +79,16 @@ public class TrashController {
         log.info(this.getClass().getName() + " reportPage Start!!");
 
         ReportCreDTO rDTO = new ReportCreDTO();
-        List<ReportCreDTO> rList = trashService.selectAllTrash();
+        // List<ReportCreDTO> rList = trashService.selectAllTrash();
 
-        model.addAttribute("rList",rList);
+        // model.addAttribute("rList",rList);
 
-        for(ReportCreDTO rDTO2 : rList){
-            log.info(rDTO2.getReport_id() + "");
-            log.info(rDTO2.getReporter_id() + "");
-        }
+        // for(ReportCreDTO rDTO2 : rList){
+        //     log.info(rDTO2.getReport_id() + "");
+        //     log.info(rDTO2.getReporter_id() + "");
+        // }
 
-        log.info("size : " + rList.size());
+        // log.info("size : " + rList.size());
 
         log.info(this.getClass().getName() + " reportPage End!!");
 
