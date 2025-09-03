@@ -24,7 +24,7 @@ public class ReportCreDTO {
     private Double lng;              // 경도
     private String status;           // 상태 (pending / resolved 등)
     private String title;
-    private String point;
+    private int point;
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
     private String resolver_id;

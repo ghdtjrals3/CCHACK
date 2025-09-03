@@ -4,9 +4,11 @@ import kopo.poly.dto.MissionScoreIn;
 import kopo.poly.dto.MissionScoreOut;
 import kopo.poly.service.IMissionScoringService;
 import kopo.poly.service.ScoringModel;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+@Slf4j
 @Service
 public class MissionScoringService implements IMissionScoringService {
 
@@ -33,6 +35,8 @@ public class MissionScoringService implements IMissionScoringService {
                 in.getTitle(),
                 in.getAddr()
         );
+
+        log.info("dong : " + r.dong.toString());
 
         // 필요한 필드만 응답으로 매핑
         return new MissionScoreOut(in.getReport_id(), r.point, r.dong);

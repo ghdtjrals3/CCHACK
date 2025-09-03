@@ -9,6 +9,7 @@ import kopo.poly.dto.UserDTO;
 import kopo.poly.service.ITrashService;
 import kopo.poly.service.IUserService;
 import kopo.poly.util.CmmUtil;
+import kopo.poly.util.PointUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -39,13 +40,28 @@ public class TrashController {
 
         ReportCreDTO rDTO = new ReportCreDTO();
 
+        String user_id = (String) session.getAttribute("user_id");
+        Double lan = Double.parseDouble(request.getParameter("latitude"));
+        Double lon = Double.parseDouble(request.getParameter("longitude"));
+        String title = request.getParameter("title");
 
         rDTO.setDescription(request.getParameter("description"));
-        rDTO.setLat(Double.parseDouble(request.getParameter("latitude")));
-        rDTO.setLng(Double.parseDouble(request.getParameter("longitude")));
+        rDTO.setLat(lan);
+        rDTO.setLng(lon);
         rDTO.setStatus("false");
-        rDTO.setReporter_id((CmmUtil.nvl((String) session.getAttribute("user_id"))));
-        rDTO.setTitle(request.getParameter("title"));
+        rDTO.setReporter_id(user_id);
+        rDTO.setTitle(title);
+
+
+        String residence_dong = trashService.getDong(user_id);
+        log.info("resi dong : " + residence_dong);
+
+        int point = PointUtil.postMissionScorePoint(1,lan, lon, title, residence_dong);
+        log.info("point : " + point);
+
+        rDTO.setPoint(point);
+
+
 
         trashService.reportProc(rDTO,image);
 
@@ -62,8 +78,6 @@ public class TrashController {
         ReportCreDTO rDTO = new ReportCreDTO();
         rDTO.setNote(request.getParameter("note"));
         rDTO.setReport_id(Long.valueOf(request.getParameter("report_id")));
-
-
         rDTO.setResolver_id(session.getAttribute("user_id").toString());
 
         log.info(rDTO.getReport_id() + "");
@@ -85,7 +99,7 @@ public String reportPage(HttpSession session, Model model) throws Exception {
     ReportCreDTO rDTO = new ReportCreDTO();
     List<ReportCreDTO> rList = trashService.selectAllTrash();
 
-    model.addAttribute("list", rList);
+    model.addAttribute("rList", rList);
 
     for (ReportCreDTO rDTO2 : rList) {
         log.info("report_id : {}", rDTO2.getReport_id());

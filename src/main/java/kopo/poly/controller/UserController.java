@@ -167,6 +167,12 @@ public class UserController {
         List<ReportCreDTO> rList = trashService.selectAllReportById(user_id);
         List<ReportCreDTO> sList = trashService.selectAllSolutionById(user_id);
 
+        UserDTO uDTO = new UserDTO();
+
+        uDTO = userService.getUserInfo(user_id);
+
+        log.info("nick : " + uDTO.getUser_nick_name());
+
 
         for(ReportCreDTO reportCreDTO : rList) {
             log.info("repoter_id : " + reportCreDTO.getReporter_id());
@@ -184,6 +190,7 @@ public class UserController {
 
         model.addAttribute("rList", rList);
         model.addAttribute("sList", sList);
+        model.addAttribute("uDTO", uDTO);
 
         log.info(this.getClass().getName() + "myPage End!");
         return "user/myPage";

@@ -42,7 +42,8 @@
             lng,
             status,
             created_at,
-            title
+            title,
+            point
         )
         VALUES
             (
@@ -53,7 +54,8 @@
                 #{lng,jdbcType=DOUBLE},
                 #{status},
                 NOW(),
-                #{title}
+                #{title},
+                #{point,jdbcType=INTEGER}
             )
     </insert>
 
@@ -83,6 +85,12 @@
         SET resolver_id = #{resolver_id}, note = #{note}, proof_image_url = #{proof_image_url}, solved_at = NOW(), status = 'true'
         WHERE report_id = #{report_id}
     </update>
+
+    <select id="getDong" parameterType="String" resultType="String">
+        SELECT residence_dong
+        FROM users
+        WHERE user_id = #{userId}
+    </select>
 
 
 

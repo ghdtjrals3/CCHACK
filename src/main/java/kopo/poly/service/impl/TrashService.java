@@ -75,5 +75,12 @@ public class TrashService implements ITrashService {
         return trashMapper.selectAllSolutionById(userId);
     }
 
+    @Override
+    public String getDong(String userId) throws Exception {
+        log.info(this.getClass().getName() + "getDong Service Start!!");
+        log.info(this.getClass().getName() + " getDong service end!!");
+        return trashMapper.getDong(userId);
+    }
+
 
 }

@@ -17,4 +17,6 @@ public interface ITrashService {
     List<ReportCreDTO> selectAllReportById(String userId) throws Exception;
 
     List<ReportCreDTO> selectAllSolutionById(String userId) throws Exception;
+
+    String getDong(String userId) throws Exception;
 }

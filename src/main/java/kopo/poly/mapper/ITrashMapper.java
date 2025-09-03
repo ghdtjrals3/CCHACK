@@ -18,4 +18,6 @@ public interface ITrashMapper {
     List<ReportCreDTO> selectAllTrash() throws Exception;
     List<ReportCreDTO> selectAllReportById(String user_id) throws Exception;
     List<ReportCreDTO> selectAllSolutionById(String userId) throws Exception;
+
+    String getDong(String userId) throws Exception;
 }
