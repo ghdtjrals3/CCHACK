@@ -43,7 +43,7 @@ public class TrashController {
         rDTO.setDescription(request.getParameter("description"));
         rDTO.setLat(Double.parseDouble(request.getParameter("latitude")));
         rDTO.setLng(Double.parseDouble(request.getParameter("longitude")));
-        rDTO.setStatus("pending");
+        rDTO.setStatus("false");
         rDTO.setReporter_id((CmmUtil.nvl((String) session.getAttribute("user_id"))));
         rDTO.setTitle(request.getParameter("title"));
 

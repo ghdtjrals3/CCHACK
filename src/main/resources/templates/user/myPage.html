@@ -35,6 +35,42 @@
         .hidden{display:none;}
         @media (max-width: 768px){ .grid{grid-template-columns:1fr;} }
     </style>
+
+    <!--추가 스타일-->
+    <style>
+        /* horizontal scroller */
+        .h-scroll{position:relative;margin-top:16px}
+        .h-track{
+            display:grid; grid-auto-flow:column; grid-auto-columns: 82%;
+            gap:14px; overflow-x:auto; overscroll-behavior-x:contain;
+            scroll-snap-type:x mandatory; padding:6px 4px 14px;
+            scrollbar-width:none;
+        }
+        .h-track::-webkit-scrollbar{display:none}
+        .card-snap{scroll-snap-align:start}
+        @media (min-width:900px){ .h-track{grid-auto-columns: 46%} }
+        @media (min-width:1200px){ .h-track{grid-auto-columns: 32%} }
+
+        /* card visuals (재사용) */
+        .cardX{background:#fff;border:1px solid #f0f0f2;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.03)}
+        .cardX .media{position:relative;aspect-ratio:16/9;background:#f7f8fb}
+        .cardX .media img{width:100%;height:100%;object-fit:cover;display:block}
+        .badgeX{position:absolute;top:10px;left:10px;padding:6px 10px;border-radius:999px;font-size:12px;color:#fff;background:#9aa1ff}
+        .badgeX.green{background:#22c55e}
+        .badgeX.gray{background:#9ca3af}
+        .cardX .body{padding:12px 14px 14px}
+        .cardX .title{font-weight:800;margin:2px 0 6px}
+        .cardX .meta{display:flex;gap:10px;flex-wrap:wrap;color:#777;font-size:12px;margin-bottom:6px}
+        .cardX .desc{font-size:14px;color:#333;margin:6px 0 10px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+        .cardX .row{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#555}
+        .cardX .actions{display:flex;gap:8px;margin-top:10px}
+        .btn-mini{padding:8px 12px;border-radius:10px;border:1px solid #d9d9df;background:#f6f6fa;cursor:pointer}
+        .btn-mini.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+
+        /* scroller arrows */
+        .h-arrows{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+        .h-arrows .nav{border:0;background:#f2f3f6;border-radius:10px;padding:8px 10px;cursor:pointer}
+    </style>
 </head>
 <body>
 
@@ -51,22 +87,89 @@
 
         <!-- 신고 탭 컨텐츠 -->
         <div id="pane-report" class="pane">
-            <div class="center">
-                <img th:src="@{/img/empty-note.png}" alt="" width="120" height="120"
-                     onerror="this.style.display='none'">
+            <!-- 빈 상태 -->
+            <div class="center" th:if="${#lists.isEmpty(rList)}">
+                <img th:src="@{/img/empty-note.png}" alt="" width="120" height="120" onerror="this.style.display='none'">
                 <div>신고 내역이 없어요</div>
             </div>
-            <!-- TODO: 신고 목록 렌더링 -->
+
+            <!-- 리스트 -->
+            <div class="h-scroll" th:if="${!#lists.isEmpty(rList)}">
+                <div class="h-track" id="trackReport">
+                    <article class="cardX card-snap" th:each="r : ${rList}">
+                        <div class="media">
+                            <img th:src="${r.image_url}" alt="">
+                            <span class="badgeX"
+                                  th:text="${r.status} ? '해결완료' : '신고접수'"
+                                  th:classappend="${r.status} ? ' green' : ''"></span>
+                        </div>
+                        <div class="body">
+                            <div class="title" th:text="${r.title}">제목</div>
+                            <div class="meta">
+<!--                                <span th:text="${r.addr}">주소</span>-->
+                                <span th:text="${#temporals.format(r.created_at,'yyyy.MM.dd HH:mm')}">날짜</span>
+                            </div>
+                            <p class="desc" th:text="${r.description}">설명</p>
+                            <div class="row">
+                                <span>포인트 <b th:text="${r.point}">0</b></span>
+                                <span>#<b th:text="${r.report_id}">-</b></span>
+                            </div>
+                            <div class="actions">
+                                <a class="btn-mini" th:href="@{/report/detail/{id}(id=${r.report_id})}">상세</a>
+                                <!-- 미해결 + 로그인시에만 보이도록 -->
+                                <button class="btn-mini primary"
+                                        th:if="${!r.status and !#strings.isEmpty(#strings.trim(session.user_id))}"
+                                        th:attr="data-id=${r.report_id}"
+                                        onclick="openSolveModal(this)">해결하기</button>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+                <div class="h-arrows">
+                    <button class="nav" data-target="#trackReport" data-dir="-1">◀</button>
+                    <button class="nav" data-target="#trackReport" data-dir="1">▶</button>
+                </div>
+            </div>
         </div>
 
         <!-- 해결 탭 컨텐츠 -->
         <div id="pane-resolved" class="pane hidden">
-            <div class="center">
-                <img th:src="@{/img/empty-note.png}" alt="" width="120" height="120"
-                     onerror="this.style.display='none'">
+            <!-- 빈 상태 -->
+            <div class="center" th:if="${#lists.isEmpty(sList)}">
+                <img th:src="@{/img/empty-note.png}" alt="" width="120" height="120" onerror="this.style.display='none'">
                 <div>해결된 내역이 없어요</div>
             </div>
-            <!-- TODO: 해결 목록 렌더링 -->
+
+            <!-- 리스트 -->
+            <div class="h-scroll" th:if="${!#lists.isEmpty(sList)}">
+                <div class="h-track" id="trackSolved">
+                    <article class="cardX card-snap" th:each="s : ${sList}">
+                        <div class="media">
+                            <img th:src="${s.proof_image_url != null ? s.proof_image_url : s.image_url}" alt="">
+                            <span class="badgeX green">해결완료</span>
+                        </div>
+                        <div class="body">
+                            <div class="title" th:text="${s.title}">제목</div>
+                            <div class="meta">
+<!--                                <span th:text="${s.addr}">주소</span>-->
+                                <span th:text="${#temporals.format(s.solved_at,'yyyy.MM.dd HH:mm')}">해결일</span>
+                            </div>
+                            <p class="desc" th:text="${s.note != null ? s.note : '메모 없음'}">메모</p>
+                            <div class="row">
+                                <span>해결자 <b th:text="${s.resolver_id}">나</b></span>
+                                <span>#<b th:text="${s.report_id}">-</b></span>
+                            </div>
+                            <div class="actions">
+                                <a class="btn-mini" th:href="@{/report/detail/{id}(id=${s.report_id})}">상세</a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+                <div class="h-arrows">
+                    <button class="nav" data-target="#trackSolved" data-dir="-1">◀</button>
+                    <button class="nav" data-target="#trackSolved" data-dir="1">▶</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -173,6 +276,35 @@
     document.getElementById('btnCancel').addEventListener('click', function(){
         history.back(); // 필요 시 변경
     });
+</script>
+<!--추가 스크립트-->
+<script>
+    // 좌우 버튼 스크롤
+    document.querySelectorAll('.h-arrows .nav').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+            const track = document.querySelector(btn.dataset.target);
+            const dir = Number(btn.dataset.dir);
+            const delta = Math.round(track.clientWidth * 0.9) * dir; // 90% 폭씩
+            track.scrollBy({left: delta, behavior: 'smooth'});
+        });
+    });
+
+    // (선택) 드래그로 스크롤
+    ['trackReport','trackSolved'].forEach(id=>{
+        const el = document.getElementById(id);
+        if(!el) return;
+        let isDown=false,startX,scrollLeft;
+        el.addEventListener('pointerdown',e=>{isDown=true;startX=e.pageX;scrollLeft=el.scrollLeft;el.setPointerCapture(e.pointerId);});
+        el.addEventListener('pointermove',e=>{if(!isDown) return; el.scrollLeft = scrollLeft - (e.pageX-startX);});
+        ['pointerup','pointerleave'].forEach(ev=>el.addEventListener(ev,()=>{isDown=false;}));
+    });
+
+    // 해결 모달 (예시)
+    function openSolveModal(button){
+        const id = button.getAttribute('data-id');
+        // TODO: 모달 열기 로직 연결
+        console.log('solve report', id);
+    }
 </script>
 </body>
 </html>

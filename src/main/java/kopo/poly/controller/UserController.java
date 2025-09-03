@@ -182,6 +182,9 @@ public class UserController {
             log.info("status : " + reportCreDTO.getStatus());
         }
 
+        model.addAttribute("rList", rList);
+        model.addAttribute("sList", sList);
+
         log.info(this.getClass().getName() + "myPage End!");
         return "user/myPage";
     }
