@@ -9,7 +9,6 @@ import kopo.poly.dto.UserDTO;
 import kopo.poly.service.ITrashService;
 import kopo.poly.service.IUserService;
 import kopo.poly.util.CmmUtil;
-import kopo.poly.util.PointUtil;
 import kopo.poly.util.SimpleScore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -108,18 +107,18 @@ public String reportPage(HttpSession session, Model model) throws Exception {
     log.info(this.getClass().getName() + " reportPage Start!!");
 
     ReportCreDTO rDTO = new ReportCreDTO();
-     List<ReportCreDTO> rList = trashService.selectAllTrash();
+    //  List<ReportCreDTO> rList = trashService.selectAllTrash();
 
-     model.addAttribute("rList", rList);
+    //  model.addAttribute("rList", rList);
 
-     for (ReportCreDTO rDTO2 : rList) {
-         log.info("report_id : {}", rDTO2.getReport_id());
-         log.info("reporter_id : {}", rDTO2.getReporter_id());
-     }
+    //  for (ReportCreDTO rDTO2 : rList) {
+    //      log.info("report_id : {}", rDTO2.getReport_id());
+    //      log.info("reporter_id : {}", rDTO2.getReporter_id());
+    //  }
 
-     // 충돌난 부분을 이렇게 정리
-     log.info("size : {}", rList.size());
-     log.info("id : {}", CmmUtil.nvl((String) session.getAttribute("user_id")));
+    //  // 충돌난 부분을 이렇게 정리
+    //  log.info("size : {}", rList.size());
+    //  log.info("id : {}", CmmUtil.nvl((String) session.getAttribute("user_id")));
 
     log.info(this.getClass().getName() + " reportPage End!!");
 

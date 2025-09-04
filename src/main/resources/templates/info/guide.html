@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <title>춘천시 생활쓰레기 안내</title>
+
+    <link rel="stylesheet" th:href="@{/info/guide.css}" />
+  </head>
+  <body>
+    <!-- 상단 네비게이션 -->
+    <header class="site-header">
+      <div class="inner">
+        <a class="brand" href="/">동구라미 온</a>
+
+        <nav class="nav-links">
+          <a class="nav-link" data-route="/" href="/">홈</a>
+          <a
+            class="nav-link"
+            data-route="/trash/reportPage"
+            href="/trash/reportPage"
+            >지도</a
+          >
+          <a
+            class="nav-link"
+            data-route="/personal/mission"
+            href="/personal/mission"
+            >참여</a
+          >
+          <a class="nav-link" data-route="/center" href="/center">센터</a>
+          <a class="nav-link" data-route="/info" href="/info/guide">정보</a>
+        </nav>
+
+        <div class="auth">
+          <a class="btn primary" href="/login">로그인</a>
+          <a class="btn" href="/me">내 정보</a>
+        </div>
+      </div>
+    </header>
+
+    <div class="safe"></div>
+    <main class="container">
+      <section class="card lg">
+        <h1 class="page-title">생활쓰레기 배출 안내</h1>
+        <div class="kv">
+          <div class="pill">배출시간</div>
+          <div th:text="${g.hours}">18:00~23:00</div>
+          <br />
+          <div class="pill">봉투</div>
+          <div th:text="${g.bagColor}">주황색 소각용 종량제 봉투</div>
+          <br />
+          <div class="pill">배출장소(일반)</div>
+          <div th:text="${g.locationsGeneral}">가까운 수거장</div>
+          <br />
+          <div class="pill">배출장소(음식물)</div>
+          <div th:text="${g.locationsFood}">공동수거장/건물 앞</div>
+          <br />
+          <div class="pill">대형폐기물</div>
+          <a th:href="${g.bulkyUrl}" target="_blank" rel="noopener"
+            >온라인 신고</a
+          >
+          <div class="src">출처: 춘천시 생활쓰레기 안내</div>
+        </div>
+      </section>
+
+      <div class="tabs">
+        <button class="tab active" data-tab="recy">재활용</button>
+        <button class="tab" data-tab="food">음식물</button>
+        <button class="tab" data-tab="class">분리배출 기준</button>
+        <button class="tab" data-tab="comp">수거업체</button>
+      </div>
+
+      <!-- 재활용 -->
+      <section id="recy" class="card section">
+        <h2 th:text="${g.recyclable.title}">재활용</h2>
+        <div
+          class="para"
+          th:each="p : ${g.recyclable.paragraphs}"
+          th:text="${p}"
+        >
+          문단
+        </div>
+        <ul class="bullets">
+          <li th:each="b : ${g.recyclable.bullets}" th:text="${b}">항목</li>
+        </ul>
+        <div class="tables" th:if="${g.recyclable.tables}">
+          <div class="table-wrap" th:each="t : ${g.recyclable.tables}">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th th:each="h : ${t.headers}" th:text="${h}">헤더</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="r : ${t.rows}">
+                  <td th:each="c : ${r}" th:text="${c}">셀</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="src">
+          <a th:href="${g.recyclable.sourceUrl}" target="_blank"
+            >재활용 안내 원문</a
+          >
+        </div>
+      </section>
+
+      <!-- 음식물 -->
+      <section id="food" class="card section" hidden>
+        <h2 th:text="${g.food.title}">음식물쓰레기</h2>
+        <div class="para" th:each="p : ${g.food.paragraphs}" th:text="${p}">
+          문단
+        </div>
+        <ul class="bullets">
+          <li th:each="b : ${g.food.bullets}" th:text="${b}">항목</li>
+        </ul>
+        <div class="tables" th:if="${g.food.tables}">
+          <div class="table-wrap" th:each="t : ${g.food.tables}">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th th:each="h : ${t.headers}" th:text="${h}">헤더</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="r : ${t.rows}">
+                  <td th:each="c : ${r}" th:text="${c}">셀</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="src">
+          <a th:href="${g.food.sourceUrl}" target="_blank">음식물 안내 원문</a>
+        </div>
+      </section>
+
+      <!-- 분리배출 -->
+      <section id="class" class="card section" hidden>
+        <h2 th:text="${g.classification.title}">분리배출 기준</h2>
+        <div
+          class="para"
+          th:each="p : ${g.classification.paragraphs}"
+          th:text="${p}"
+        >
+          문단
+        </div>
+        <ul class="bullets">
+          <li th:each="b : ${g.classification.bullets}" th:text="${b}">항목</li>
+        </ul>
+        <div class="tables" th:if="${g.classification.tables}">
+          <div class="table-wrap" th:each="t : ${g.classification.tables}">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th th:each="h : ${t.headers}" th:text="${h}">헤더</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="r : ${t.rows}">
+                  <td th:each="c : ${r}" th:text="${c}">셀</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="src">
+          <a th:href="${g.classification.sourceUrl}" target="_blank"
+            >분리배출 기준 원문</a
+          >
+        </div>
+      </section>
+
+      <!-- 수거업체 -->
+      <section id="comp" class="card section" hidden>
+        <h2>생활쓰레기 수거업체</h2>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>업체명</th>
+                <th>연락처</th>
+                <th>담당지역/주소</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="c : ${g.companies}">
+                <td th:text="${c.name}">업체</td>
+                <td th:text="${c.phone}">전화</td>
+                <td th:text="${c.areaOrAddr}">지역</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="src">
+          <a href="/info/guide/refresh">데이터 새로고침</a> ·
+          <a href="/info/guide.json" target="_blank">JSON 보기</a>
+        </div>
+      </section>
+
+      <section class="card src">
+        본 페이지는 춘천시 공식 페이지 공개 정보를 요약/표로 가공해 제공합니다.
+        최신 내용은 시청 고지/조례를 우선합니다.
+      </section>
+    </main>
+    <!-- 모바일 하단 탭바 -->
+    <nav class="bottom-nav" aria-label="하단탭">
+      <div class="bn-inner">
+        <a class="bn-item" data-route="/" href="/" aria-label="홈">
+          <span class="ic">🏠</span><span>홈</span>
+        </a>
+        <a
+          class="bn-item"
+          data-route="/trash/reportPage"
+          href="/trash/reportPage"
+          aria-label="지도"
+        >
+          <span class="ic">🗺️</span><span>지도</span>
+        </a>
+        <a
+          class="bn-item"
+          data-route="/personal/mission"
+          href="/personal/mission"
+          aria-label="참여"
+        >
+          <span class="ic">🤝</span><span>참여</span>
+        </a>
+        <a
+          class="bn-item"
+          data-route="/center"
+          href="/center"
+          aria-label="센터"
+        >
+          <span class="ic">🏢</span><span>센터</span>
+        </a>
+        <a
+          class="bn-item"
+          data-route="/info"
+          href="/info/guide"
+          aria-label="정보"
+        >
+          <span class="ic">ℹ️</span><span>정보</span>
+        </a>
+      </div>
+    </nav>
+
+    <script th:src="@{/info/guide.js}"></script>
+  </body>
+</html>
