@@ -33,57 +33,97 @@
 
   <main class="grid" id="grid"></main>
 
-  <nav class="bottom-nav" aria-label="하단 내비게이션">
-    <a class="bn-item active" href="#"><span class="i">🏁</span>미션</a>
-    <a class="bn-item" href="#"><span class="i">🗺️</span>지도</a>
-    <a class="bn-item" href="#"><span class="i">🤝</span>참여</a>
-    <a class="bn-item" href="#"><span class="i">🏢</span>센터</a>
-    <a class="bn-item" href="#"><span class="i">ℹ️</span>정보</a>
-  </nav>
-
-  <!-- 미션 상세 모달 -->
-  <div class="modal" id="missionModal">
-    <div class="overlay" data-close="mission"></div>
-    <div class="sheet center" role="dialog" aria-modal="true">
-      <div class="m-head">
-        <div class="m-title" id="mTitle">미션 상세</div>
-        <button class="close" data-close="mission">✕</button>
+    <!-- 하단 탭: nav.css의 .bottom-nav 구조로 정리 -->
+    <nav class="bottom-nav" aria-label="하단탭">
+      <div class="bn-inner">
+        <a class="bn-item" href="http://localhost:11000/"
+          ><span class="ic" aria-hidden="true">🏠</span><span>홈</span></a
+        >
+        <a class="bn-item" href="http://localhost:11000/trash/reportPage"
+          ><span class="ic" aria-hidden="true">🗺️</span><span>지도</span></a
+        >
+        <a class="bn-item" href="http://localhost:11000/personal/mission"
+          ><span class="ic" aria-hidden="true">🤝</span><span>참여</span></a
+        >
+        <a class="bn-item" href="http://localhost:11000/center"
+          ><span class="ic" aria-hidden="true">🏢</span><span>센터</span></a
+        >
+        <a class="bn-item" href="http://localhost:11000/info/guide"
+          ><span class="ic" aria-hidden="true">ℹ️</span><span>정보</span></a
+        >
       </div>
-      <div class="m-body">
-        <div id="mMeta" class="meta"></div>
-        <div id="mDesc" class="desc"></div>
-        <div class="row-actions">
-          <button class="btn" data-close="mission">나중에</button>
-          <button class="btn primary" id="btnStart">도전하기</button>
+    </nav>
+
+    <!-- 미션 상세 모달 -->
+    <div class="modal" id="missionModal">
+      <div class="overlay" data-close="mission" aria-hidden="true"></div>
+      <div
+        class="sheet center"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="mTitle"
+      >
+        <div class="m-head">
+          <div class="m-title" id="mTitle">미션 상세</div>
+          <button class="close" data-close="mission" aria-label="닫기">
+            ✕
+          </button>
+        </div>
+        <div class="m-body">
+          <div id="mMeta" class="meta"></div>
+          <div id="mDesc" class="desc"></div>
+          <div class="row-actions">
+            <button class="btn" data-close="mission">나중에</button>
+            <button class="btn primary" id="btnStart">도전하기</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- 업로드 모달 -->
-  <div class="modal" id="uploadModal">
-    <div class="overlay" data-close="upload"></div>
-    <div class="sheet" role="dialog" aria-modal="true">
-      <div class="m-head">
-        <div class="m-title"><span id="uMissionTitle">미션 인증</span></div>
-        <button class="close" data-close="upload">✕</button>
-      </div>
-      <div class="m-body">
-        <div class="badge primary" id="uPoints">+ 50p</div>
-        <div class="drop" id="dropzone">
-          <input type="file" id="uFile" accept="image/*" capture="environment" />
-          <div class="hint">사진을 드래그하거나 탭해서 업로드</div>
+    <!-- 업로드 모달 -->
+    <div class="modal" id="uploadModal">
+      <div class="overlay" data-close="upload" aria-hidden="true"></div>
+      <div
+        class="sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="uMissionTitle"
+      >
+        <div class="m-head">
+          <div class="m-title"><span id="uMissionTitle">미션 인증</span></div>
+          <button class="close" data-close="upload" aria-label="닫기">✕</button>
         </div>
-        <div class="preview" id="uPreview"><img alt="preview"/></div>
-        <textarea id="uMemo" placeholder="미션을 인증할 간단한 메모를 남겨주세요."></textarea>
-        <div class="row-actions">
-          <button class="btn" data-close="upload">취소</button>
-          <button class="btn primary" id="uSubmit">업로드하고 미션 완료하기</button>
+        <div class="m-body">
+          <div class="badge primary" id="uPoints" aria-live="polite">+ 50p</div>
+          <div class="drop" id="dropzone">
+            <input
+              type="file"
+              id="uFile"
+              accept="image/*"
+              capture="environment"
+              aria-label="인증 사진 업로드"
+            />
+            <div class="hint">사진을 드래그하거나 탭해서 업로드</div>
+          </div>
+          <div class="preview" id="uPreview">
+            <img alt="업로드 미리보기" />
+          </div>
+          <textarea
+            id="uMemo"
+            placeholder="미션을 인증할 간단한 메모를 남겨주세요."
+            aria-label="미션 메모"
+          ></textarea>
+          <div class="row-actions">
+            <button class="btn" data-close="upload">취소</button>
+            <button class="btn primary" id="uSubmit">
+              업로드하고 미션 완료하기
+            </button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <script type="module" th:src="@{/personal/mission.js}"></script>
-</body>
+    <!-- 페이지 전용 스크립트 -->
+    <script type="module" th:src="@{/personal/mission.js}"></script>
+  </body>
 </html>
