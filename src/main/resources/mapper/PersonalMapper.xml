@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- JAVA와 연결할 Mapper 파일 설정 -->
+<mapper namespace="kopo.poly.mapper.IPersonalMapper">
+    <update id="goMisson" parameterType="map">
+        UPDATE mission_completion
+        <set>
+            <if test="proofNote != null">       proof_note = #{proofNote},        </if>
+            <if test="proofImageUrl != null">   proof_image_url = #{proofImageUrl},</if>
+            status = 'completed'
+        </set>
+        WHERE user_id = #{userId}
+        AND template_id = #{templateId}
+    </update>
+
+</mapper>

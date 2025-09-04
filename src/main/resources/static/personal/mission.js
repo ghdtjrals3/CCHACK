@@ -33,9 +33,10 @@ let current = null;
 function renderCard(m){
     const meta = META[m.code] || META.DEFAULT;
     const points = (m.awardedPoints ?? m.points) || 0;
+    const done = (m.status === 'completed' || m.status === 'success');
+
     const el = document.createElement('div');
     el.className = 'card mission-card';
-    if (m.status === 'completed') el.classList.add('is-done');
     el.dataset.assignmentId = m.assignmentId;
     el.dataset.templateId = m.templateId;
     el.dataset.title = m.title;
@@ -43,6 +44,7 @@ function renderCard(m){
     el.dataset.points = points;
     el.dataset.algoExpected = m.algoExpected || '';
 
+    // 기본 본문
     el.innerHTML = `
     <div class="card-head">
       <div class="icon" aria-hidden="true">${meta.icon}</div>
@@ -52,11 +54,23 @@ function renderCard(m){
       </div>
     </div>
     <div class="foot">
-      <span class="meta">${m.verifyType === 'photo' ? '사진 인증' : '자동 판정'}</span>
-      <span class="badge">+ ${points}p</span>
+      <span class="meta">${done ? '완료' : (m.verifyType === 'photo' ? '사진 인증' : '자동 판정')}</span>
+      ${done ? `<span class="badge done" aria-label="해결완료">해결완료</span>` : `<span class="badge">+ ${points}p</span>`}
     </div>
   `;
-    el.addEventListener('click', ()=> openMissionModal(el, meta, points));
+
+    if (done) {
+        el.classList.add('is-done');
+        el.setAttribute('aria-disabled', 'true');
+        el.tabIndex = -1;                       // 키보드 포커스도 막기
+        el.title = '이미 완료된 미션입니다';
+        // 가시성 올리는 오버레이
+        el.insertAdjacentHTML('beforeend', `
+      <div class="done-overlay" aria-hidden="true">✅ 해결완료</div>
+    `);
+    } else {
+        el.addEventListener('click', ()=> openMissionModal(el, meta, points));
+    }
     return el;
 }
 
@@ -105,6 +119,12 @@ uFile.addEventListener('change', ()=>{
 
 // 시작(도전하기/인증하기)
 btnStart.addEventListener('click', ()=>{
+    if (!current) return;
+
+    const missionName = current.title;   // ← 여기서 잡음
+    console.log('missionName:', missionName);
+
+
     closeMissionModal();
     if(!current) return;
 
@@ -125,21 +145,41 @@ btnStart.addEventListener('click', ()=>{
 });
 
 // 사진 업로드 제출
-uSubmit.addEventListener('click', ()=>{
-    if(!current) return;
-    const f = uFile.files?.[0];
-    if(!f){ alert('사진을 업로드하세요.'); return; }
-    const fd = new FormData();
-    fd.append('photo', f);
-    fd.append('note', uMemo.value || '');
+uSubmit.addEventListener('click', async ()=>{
+    if (!current) { alert('미션 정보가 없습니다.'); return; }
 
-    fetch(`/missions/${current.assignmentId}/submit-photo`, { method:'POST', body: fd })
-        .then(r=>r.json())
-        .then(j=>{
-            if(j.ok){ closeUpload(); markDone(current.assignmentId); alert('업로드 완료! 미션이 완료되었습니다.'); }
-            else alert(j.msg || '업로드 실패');
-        })
-        .catch(()=>alert('업로드 중 오류'));
+    const templateId = current.templateId;            // ← 여기서 확보
+    const missionName = current.title;
+
+    const f = uFile.files?.[0];
+    if (!f) { alert('사진을 업로드하세요.'); return; }
+
+    console.log(uMemo.value || '');
+    console.log(missionName);
+    console.log(String(templateId));
+
+    const fd = new FormData();
+    fd.append('image', f);
+    fd.append('proof_note', uMemo.value || '');
+    fd.append('title', missionName);
+    fd.append('templateId', String(templateId));      // ← 같이 전송(문자열로)
+
+    // (필요하면) 배정 아이디도 같이
+    if (current.assignmentId) fd.append('assignmentId', String(current.assignmentId));
+
+    const headers = {};
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+    const csrfToken  = document.querySelector('meta[name="_csrf"]')?.content;
+    if (csrfHeader && csrfToken) headers[csrfHeader] = csrfToken;
+
+    try {
+        const res = await fetch('/personal/goMission', { method:'POST', body: fd, headers });
+        if (!res.ok) throw new Error(`서버 오류: ${res.status}`);
+        alert('신고가 등록되었습니다.');
+        window.location.href = '/personal/mission';
+    } catch (e) {
+        alert(e.message || '업로드 중 오류');
+    }
 });
 
 // 완료 UI 반영
@@ -147,5 +187,21 @@ function markDone(assignmentId){
     const card = grid.querySelector(`.mission-card[data-assignment-id="${assignmentId}"]`);
     if(!card) return;
     card.classList.add('is-done');
-    // 버튼 제거·완료 뱃지 추가 등 UI 업그레이드가 필요하면 여기서 처리
+    card.setAttribute('aria-disabled','true');
+    card.tabIndex = -1;
+    card.title = '이미 완료된 미션입니다';
+
+    const foot = card.querySelector('.foot');
+    foot.querySelector('.meta').textContent = '완료';
+    const badge = foot.querySelector('.badge');
+    if (badge) { badge.classList.add('done'); badge.textContent = '해결완료'; }
+    if (!card.querySelector('.done-overlay')) {
+        card.insertAdjacentHTML('beforeend', `<div class="done-overlay" aria-hidden="true">✅ 해결완료</div>`);
+    }
 }
+
+
+
+
+
+

@@ -71,4 +71,6 @@
           AND u.user_id = #{userId}
     </update>
 
+
+
 </mapper>
