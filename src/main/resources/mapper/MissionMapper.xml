@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- JAVA와 연결할 Mapper 파일 설정 -->
+<mapper namespace="kopo.poly.mapper.IMissionMapper">
+
+    <insert id="fillIfEmpty">
+        WITH has AS (
+            SELECT EXISTS (
+                SELECT 1 FROM mission_completion WHERE user_id = #{userId}
+            ) AS has_any
+        ),
+             picked AS (
+                 SELECT t.id, t.points
+                 FROM mission_template t, has
+                 WHERE has.has_any = false
+                   -- 이미 배정된 템플릿은 제외(경합 대비 중복 방지 1차)
+                   AND NOT EXISTS (
+                     SELECT 1 FROM mission_completion c
+                     WHERE c.user_id = #{userId} AND c.template_id = t.id
+                 )
+                 ORDER BY random()
+            LIMIT #{n}
+            )
+        INSERT INTO mission_completion (user_id, template_id, status, awarded_points)
+        SELECT #{userId}, p.id, 'assigned', p.points
+        FROM picked p
+             -- 경합 대비 2차 방지: UNIQUE (user_id, template_id)
+            ON CONFLICT (user_id, template_id) DO NOTHING
+    RETURNING id
+    </insert>
+
+    <!-- 2) 배정 목록(템플릿 조인) -->
+    <select id="findAssignedWithTemplate" resultType="MissionCardDTO">
+        SELECT
+            c.id                          AS assignmentId,
+            c.template_id                 AS templateId,
+            c.status                      AS status,
+            c.awarded_points              AS awardedPoints,
+            t.code                        AS code,
+            t.title                       AS title,
+            t.verify_type                 AS verifyType,
+            t.algo_key                    AS algoKey,
+            t.algo_expected               AS algoExpected,
+            t.points                      AS points
+        FROM mission_completion c
+                 JOIN mission_template  t ON t.id = c.template_id
+        WHERE c.user_id = #{userId}
+        ORDER BY c.created_at ASC
+    </select>
+
+    <!-- 3) 사진 인증 완료 -->
+    <update id="completeWithPhoto">
+        UPDATE mission_completion
+        SET status = 'completed',
+            proof_image_url = #{proofImageUrl},
+            proof_note = #{proofNote}
+        WHERE id = #{assignmentId}
+          AND user_id = #{userId}
+          AND status = 'assigned'
+    </update>
+
+    <!-- 4) (선택) users 포인트 적립 – users 테이블 있을 때만 사용 -->
+    <update id="addUserPointFromCompletion">
+        UPDATE users u
+        SET point = u.point + mc.awarded_points
+            FROM mission_completion mc
+        WHERE mc.id = #{assignmentId}
+          AND mc.user_id = #{userId}
+          AND mc.status = 'completed'
+          AND u.user_id = #{userId}
+    </update>
+
+</mapper>

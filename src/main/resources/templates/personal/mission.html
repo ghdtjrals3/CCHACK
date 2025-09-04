@@ -1,11 +1,10 @@
-<!-- index.html -->
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>개인 미션 • 탄소중립</title>
-  <link rel="stylesheet" th:href="@{/personal/mission.css}" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>개인 미션 • 탄소중립</title>
+    <link rel="stylesheet" th:href="@{/personal/mission.css}" />
 </head>
 <body>
   <div class="safe"></div>
@@ -22,6 +21,10 @@
       </div>
     </nav>
   </header>
+
+  <script th:inline="javascript">
+      window.MISSIONS = /*[[${missions}]]*/ [];
+  </script>
 
   <div class="title-wrap">
     <h1>보너스 포인트 받는<br/>미션 모아봤어요</h1>

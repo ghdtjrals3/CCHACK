@@ -98,7 +98,14 @@ public class UserController {
     public String index(HttpSession session, ModelMap model, HttpServletRequest request) throws Exception {
         log.info(this.getClass().getName() + ".login Start!");
 
-        String user_id = CmmUtil.nvl(session.getAttribute("user_id").toString());
+        String user_id = "";
+
+        try {
+            user_id = CmmUtil.nvl(session.getAttribute("user_id").toString());
+
+        } catch (NullPointerException e) {
+            user_id = "";
+        }
 
         UserDTO uDTO = new UserDTO();
 

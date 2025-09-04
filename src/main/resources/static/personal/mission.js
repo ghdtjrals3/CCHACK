@@ -1,103 +1,151 @@
-// /static/js/app.js
-import { startTransitAuth } from '../js/pmission/auth-transit.js';
-import { startWalkAuth } from '../js/pmission/auth-walk.js';
-import { startBikeAuth } from '../js/pmission/auth-bike.js';
-import { bindUploadModal } from '../js/pmission/auth-upload.js';
-
-/* 포인트/데이터 */
-const POINTS = { easy: 50, normal: 100, hard: 200 };
-const missions = [
-  { id:1, icon:"🚌", tag:"대중교통 타기", level:"easy",
-    title:"대중교통으로 출근하기", desc:"자가용 대신 버스/지하철로 출퇴근하면 탄소를 확 줄일 수 있어요." },
-  { id:2, icon:"🥤", tag:"일회용 안쓰기", level:"normal",
-    title:"일회용품 사용하지 않기", desc:"텀블러/리유저블 컵 사용으로 일회용 컵을 줄여요." },
-  { id:3, icon:"🛒", tag:"장바구니", level:"easy",
-    title:"장바구니 챙기기", desc:"마트/편의점에서 장바구니 사용으로 비닐봉투 줄이기." },
-  { id:4, icon:"🍚", tag:"음식물 줄이기", level:"normal",
-    title:"음식물 쓰레기 20% 줄이기", desc:"한 끼 양을 조절하고 남긴 음식 포장 대신 비우기 실천." },
-  { id:5, icon:"🚶", tag:"걷기", level:"easy",
-    title:"하루 1만 보 걷기", desc:"가까운 거리는 도보로 이동해요." },
-  { id:9, icon:"🚴", tag:"자전거 타기", level:"normal",
-    title:"자전거로 이동하기", desc:"가까운 거리는 자전거로 이동해요." },
-  { id:6, icon:"🔌", tag:"절전", level:"hard",
-    title:"콘센트 대기전력 차단", desc:"멀티탭 스위치를 꺼서 대기전력 절감하기." },
-  { id:7, icon:"🌳", tag:"나무심기", level:"hard",
-    title:"탄소중립 행사 참여", desc:"지역 환경 봉사/나무심기 행사 참가." },
-  { id:8, icon:"♻️", tag:"분리배출", level:"normal",
-    title:"정확한 분리배출 실천", desc:"재활용 분류표대로 꼼꼼히 분리하기." },
-];
-
-/* 카드 렌더링 */
+// mission.js (교체)
 const grid = document.getElementById('grid');
+const missionModal = document.getElementById('missionModal');
+const mTitle = document.getElementById('mTitle');
+const mMeta  = document.getElementById('mMeta');
+const mDesc  = document.getElementById('mDesc');
+const btnStart = document.getElementById('btnStart');
 
+const uploadModal  = document.getElementById('uploadModal');
+const uMissionTitle = document.getElementById('uMissionTitle');
+const uPoints = document.getElementById('uPoints');
+const uFile = document.getElementById('uFile');
+const uPreview = document.querySelector('#uPreview img');
+const uMemo = document.getElementById('uMemo');
+const uSubmit = document.getElementById('uSubmit');
+
+const MISSIONS = Array.isArray(window.MISSIONS) ? window.MISSIONS : []; // 서버 주입
+// code -> UI 메타 매핑
+const META = {
+    COMMUTE_TRANSIT: { icon:'🚌', tag:'대중교통 타기', desc:'자가용 대신 버스/지하철로 출퇴근해요.' },
+    COMMUTE_BIKE:    { icon:'🚴', tag:'자전거 타기',   desc:'가까운 거리는 자전거로 이동해요.' },
+    RECYCLING_PROPER:{ icon:'♻️', tag:'분리배출',      desc:'재활용 분류표대로 꼼꼼히 분리해요.' },
+    NO_SINGLE_USE:   { icon:'🚫🥤', tag:'일회용 안쓰기', desc:'텀블러/리유저블 컵을 사용해요.' },
+    BRING_BAG:       { icon:'🛒', tag:'장바구니',      desc:'장바구니로 비닐봉투를 줄여요.' },
+    TURN_OFF_STANDBY_POWER:{ icon:'🔌', tag:'절전',   desc:'멀티탭 스위치를 꺼서 대기전력 절감.' },
+    JOIN_NETZERO_EVENT:{ icon:'🌳', tag:'행사참여',     desc:'지역 환경 봉사/나무심기에 참여해요.' },
+    DEFAULT:         { icon:'✅', tag:'미션',          desc:'탄소중립 실천으로 포인트를 모아봐요.' }
+};
+
+let current = null;
+
+// 렌더링
 function renderCard(m){
-  const p = POINTS[m.level] || 50;
-  const el = document.createElement('div');
-  el.className = 'card';
-  el.tabIndex = 0;
-  el.setAttribute('aria-label', `${m.title} – ${p}p`);
-  el.innerHTML = `
+    const meta = META[m.code] || META.DEFAULT;
+    const points = (m.awardedPoints ?? m.points) || 0;
+    const el = document.createElement('div');
+    el.className = 'card mission-card';
+    if (m.status === 'completed') el.classList.add('is-done');
+    el.dataset.assignmentId = m.assignmentId;
+    el.dataset.templateId = m.templateId;
+    el.dataset.title = m.title;
+    el.dataset.verifyType = m.verifyType;
+    el.dataset.points = points;
+    el.dataset.algoExpected = m.algoExpected || '';
+
+    el.innerHTML = `
     <div class="card-head">
-      <div class="icon" aria-hidden="true">${m.icon}</div>
+      <div class="icon" aria-hidden="true">${meta.icon}</div>
       <div>
-        <div class="meta">${m.tag}</div>
+        <div class="meta">${meta.tag}</div>
         <div class="cta">${m.title}</div>
       </div>
     </div>
     <div class="foot">
-      <span class="meta">미션 난이도: ${m.level}</span>
-      <span class="badge">+ ${p}p</span>
-    </div>`;
-  el.addEventListener('click', () => openMissionModal(m, p));
-  el.addEventListener('keydown', (e)=>{
-    if(e.key==='Enter' || e.key===' ') { e.preventDefault(); openMissionModal(m,p); }
-  });
-  return el;
+      <span class="meta">${m.verifyType === 'photo' ? '사진 인증' : '자동 판정'}</span>
+      <span class="badge">+ ${points}p</span>
+    </div>
+  `;
+    el.addEventListener('click', ()=> openMissionModal(el, meta, points));
+    return el;
 }
-function render(){ grid.innerHTML=''; missions.forEach(m=>grid.appendChild(renderCard(m))); }
+
+function render(){
+    grid.innerHTML = '';
+    MISSIONS.forEach(m => grid.appendChild(renderCard(m)));
+}
 render();
 
-/* 모달 제어 */
-const missionModal = document.getElementById('missionModal');
-const mTitle = document.getElementById('mTitle');
-const mMeta = document.getElementById('mMeta');
-const mDesc = document.getElementById('mDesc');
-const btnStart = document.getElementById('btnStart');
-
-let currentMission=null, currentPoints=0;
+// 모달
 function lockScroll(lock){ document.documentElement.style.overflow = lock ? 'hidden' : ''; }
-
-function openMissionModal(m,p){
-  currentMission=m; currentPoints=p;
-  mTitle.textContent=m.title;
-  mMeta.innerHTML=`<span class="meta">${m.tag}</span> <span class="badge" style="margin-left:8px">+ ${p}p</span>`;
-  mDesc.textContent=m.desc;
-  missionModal.classList.add('open'); lockScroll(true);
+function openMissionModal(cardEl, meta, points){
+    current = {
+        assignmentId: cardEl.dataset.assignmentId,
+        templateId  : cardEl.dataset.templateId,
+        title       : cardEl.dataset.title,
+        verifyType  : cardEl.dataset.verifyType,
+        points      : parseInt(points,10),
+        algoExpected: cardEl.dataset.algoExpected
+    };
+    mTitle.textContent = current.title;
+    mMeta.innerHTML = `<span class="meta">${meta.tag}</span> <span class="badge" style="margin-left:8px">+ ${current.points}p</span>`;
+    mDesc.textContent = (META[current.code]?.desc) || meta.desc;
+    missionModal.classList.add('open'); lockScroll(true);
 }
 function closeMissionModal(){ missionModal.classList.remove('open'); lockScroll(false); }
-document.querySelectorAll('[data-close="mission"]').forEach(el=>el.onclick=closeMissionModal);
-window.addEventListener('keydown',(e)=>{
-  if(e.key==='Escape' && missionModal.classList.contains('open')) closeMissionModal();
+document.querySelectorAll('[data-close="mission"]').forEach(el=>el.addEventListener('click', closeMissionModal));
+window.addEventListener('keydown',(e)=>{ if(e.key==='Escape' && missionModal.classList.contains('open')) closeMissionModal(); });
+
+// 업로드 모달
+function openUpload(){
+    uMissionTitle.textContent = current.title;
+    uPoints.textContent = `+ ${current.points}p`;
+    uFile.value = ''; uPreview.src = ''; uPreview.parentElement.style.display='none';
+    uMemo.value = '';
+    uploadModal.classList.add('open'); lockScroll(true);
+}
+function closeUpload(){ uploadModal.classList.remove('open'); lockScroll(false); }
+document.querySelectorAll('[data-close="upload"]').forEach(el=>el.addEventListener('click', closeUpload));
+uFile.addEventListener('change', ()=>{
+    const f = uFile.files?.[0];
+    if(!f) return;
+    uPreview.src = URL.createObjectURL(f);
+    document.getElementById('uPreview').style.display = 'block';
 });
 
-/* 업로드 모달 바인딩 */
-const { openUploadModal } = bindUploadModal();
+// 시작(도전하기/인증하기)
+btnStart.addEventListener('click', ()=>{
+    closeMissionModal();
+    if(!current) return;
 
-/* 시작 버튼: 미션 라우팅 */
-btnStart.onclick = () => {
-  closeMissionModal();
-  const tag = currentMission?.tag || "";
-  if (tag === "대중교통 타기")      startTransitAuth();
-  else if (tag === "걷기")          startWalkAuth();
-  else if (tag === "자전거 타기")    startBikeAuth();
-  else                               openUploadModal(currentMission, currentPoints);
-};
-document.addEventListener("DOMContentLoaded", () => {
-  const norm = s => (s||"").replace(/\/+$/,"");
-  const path = norm(location.pathname);
-  document.querySelectorAll("[data-route]").forEach(el=>{
-    const r = norm(el.getAttribute("data-route"));
-    const active = (r==="/" ? (path==="/") : path.startsWith(r));
-    if (active) el.classList.add("active");
-  });
+    if(current.verifyType === 'photo'){
+        openUpload();
+    } else {
+        // ⚠️ 임시: 서버 템플릿의 기대값(algoExpected)을 보냄
+        // 실제 배포에서는 앱/센서에서 계산한 결과 문자열로 바꿔 전송하세요.
+        const result = current.algoExpected || '';
+        fetch(`/missions/${current.templateId}/verify-algo?result=${encodeURIComponent(result)}`, { method:'POST' })
+            .then(r=>r.json())
+            .then(j=>{
+                if(j.ok){ markDone(current.assignmentId); alert('미션 완료!'); }
+                else alert(j.msg || '조건을 충족하지 못했습니다.');
+            })
+            .catch(()=>alert('처리 중 오류'));
+    }
 });
+
+// 사진 업로드 제출
+uSubmit.addEventListener('click', ()=>{
+    if(!current) return;
+    const f = uFile.files?.[0];
+    if(!f){ alert('사진을 업로드하세요.'); return; }
+    const fd = new FormData();
+    fd.append('photo', f);
+    fd.append('note', uMemo.value || '');
+
+    fetch(`/missions/${current.assignmentId}/submit-photo`, { method:'POST', body: fd })
+        .then(r=>r.json())
+        .then(j=>{
+            if(j.ok){ closeUpload(); markDone(current.assignmentId); alert('업로드 완료! 미션이 완료되었습니다.'); }
+            else alert(j.msg || '업로드 실패');
+        })
+        .catch(()=>alert('업로드 중 오류'));
+});
+
+// 완료 UI 반영
+function markDone(assignmentId){
+    const card = grid.querySelector(`.mission-card[data-assignment-id="${assignmentId}"]`);
+    if(!card) return;
+    card.classList.add('is-done');
+    // 버튼 제거·완료 뱃지 추가 등 UI 업그레이드가 필요하면 여기서 처리
+}
