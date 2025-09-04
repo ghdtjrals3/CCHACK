@@ -151,7 +151,7 @@ a{text-decoration:none}
   <div class="phone">
     <div class="appbar">
       <div class="row">
-        <div class="brand">동구라미 온</div>
+        <div class="brand"><a href="/">동구라미 온</a></div>
         <div class="menu"><a href="/trash/reportPage">지도</a><a href="#">참여</a><a href="#">센터</a><a href="#">정보</a></div>
         <div class="login">
             <a th:if="${#strings.isEmpty(session.user_id)}" th:href="@{/user/login}">로그인</a>
@@ -243,7 +243,7 @@ a{text-decoration:none}
 <section class="web-mode">
   <header class="web-header">
     <div class="row">
-      <div class="web-brand">동구라미 온</div>
+      <div class="web-brand"><a href="/">동구라미 온</a></div>
       <nav class="web-nav"><a href="/trash/reportPage">지도</a><a href="#">참여</a><a href="#">센터</a><a href="#">정보</a></nav>
         <!-- 로그인 전만 보이기 -->
         <a th:if="${#strings.isEmpty(session.user_id)}" th:href="@{/user/login}">로그인</a>
@@ -269,7 +269,7 @@ a{text-decoration:none}
           <span class="muted" th:if="${uDTO == null or uDTO.user_id == null}">로그인을 진행해주세요.</span>
           <span class="muted" th:unless="${uDTO == null or uDTO.user_id == null}">보유 포인트: <span th:text="${uDTO.point}">0</span>P</span>
       </div>
-      <div class="wcard"><strong>쓰레기 신고 · 해결</strong><br><span class="muted">8건이 기다리고 있어요.</span></div>
+      <div class="wcard"><strong>쓰레기 신고 · 해결</strong><br><span class="muted" th:text="|${size}건이 기다리고 있어요.|">0건이 기다리고 있어요.</span></div>
       <div class="wcard"><strong>스마트 배출함</strong><br><span class="muted">우유팩 수거기 · 01번 배출함</span></div>
       <div class="wcard"><strong>동구라미가게</strong><br><span class="muted">친환경자원순환센터, 동구문화센터</span></div>
     </div>

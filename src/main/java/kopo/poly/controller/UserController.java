@@ -79,6 +79,11 @@ public class UserController {
         log.info("test point : " + uDTO.getPoint());
         model.addAttribute("uDTO", uDTO);
 
+        ReportCreDTO rDTO = new ReportCreDTO();
+        List<ReportCreDTO> rList = trashService.selectAllTrash();
+
+        model.addAttribute("size", rList.size());
+
         log.info(this.getClass().getName() + ".loginProc End!");
         return "index";
     }

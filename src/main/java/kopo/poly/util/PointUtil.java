@@ -42,7 +42,6 @@ public class PointUtil {
             payload.put("latitude",  latitude);
             payload.put("longitude", longitude);
             payload.put("title",     title);
-            payload.put("addr",      addr);
 
             String json = OM.writeValueAsString(payload);
 

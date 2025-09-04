@@ -43,6 +43,7 @@ public class TrashController {
         String user_id = (String) session.getAttribute("user_id");
         Double lan = Double.parseDouble(request.getParameter("latitude"));
         Double lon = Double.parseDouble(request.getParameter("longitude"));
+
         String title = request.getParameter("title");
 
         rDTO.setDescription(request.getParameter("description"));
