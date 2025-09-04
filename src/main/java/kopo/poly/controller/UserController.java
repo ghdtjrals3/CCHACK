@@ -75,7 +75,12 @@ public class UserController {
 
         uDTO = userService.getUserInfo(user_id);
 
-        log.info("user_id : " + uDTO.getUser_id());
+        try {
+            log.info("user_id : " + uDTO.getUser_id());
+        }catch (Exception e){
+            return "user/login";
+        }
+
         log.info("test point : " + uDTO.getPoint());
         model.addAttribute("uDTO", uDTO);
 

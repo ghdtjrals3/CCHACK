@@ -151,10 +151,127 @@
         .btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer}
         .btn.primary{background:#111;color:#fff;border-color:#111}
     </style>
+    <style>
+        .dg-app-nav, .dg-web-nav { width:100%; }
+        .row{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+
+        /* ===== 모바일 네비 (<=640px에서만 표시) ===== */
+        .dg-app-nav{ display:none; }              /* 기본 숨김 */
+        @media (max-width:640px){
+            .dg-app-nav{ display:block; }
+        }
+
+        .appbar{
+            position:sticky; top:0; z-index:30;
+            background:linear-gradient(180deg,#fff,rgba(255,255,255,.92));
+            backdrop-filter:blur(6px);
+            border-bottom:1px solid var(--line);
+        }
+        .appbar .row{ padding:10px 14px; }
+        .brand{ font-weight:800; color:var(--brand); }
+        .menu a{ margin:0 8px; color:#111; font-size:14px; }
+        .login a{ color:var(--muted); font-size:14px; }
+
+        /* ===== 웹 네비 (>=768px에서만 표시) ===== */
+        .dg-web-nav{ display:none; }              /* 기본 숨김 */
+        @media (min-width:768px){
+            .dg-web-nav{ display:block; }
+        }
+
+        .web-header{
+            position:sticky; top:0; z-index:20;
+            background:#fff; border-bottom:1px solid var(--line);
+        }
+        .web-header .row{ max-width:1100px; margin:0 auto; padding:14px 16px; }
+        .web-brand{ color:var(--brand); font-weight:800; }
+        .web-nav a{ margin:0 12px; color:#111; }
+        .web-login{ color:var(--muted); }
+        .web-login a{ color:inherit; }
+
+        /* 0) 헤더/앱바 안의 링크 공통 리셋 */
+        .web-header a,
+        .web-header a:visited,
+        .appbar a,
+        .appbar a:visited{
+            color: inherit;               /* 부모 색상 유지 */
+            text-decoration: none;        /* 밑줄 제거 */
+        }
+
+        /* 1) 브랜드 로고 색 고정(visited에도 동일) */
+        .web-brand a,
+        .web-brand a:visited,
+        .brand a,
+        .brand a:visited{
+            color: var(--brand);
+        }
+
+        /* 2) 웹 메뉴 링크 색 고정 */
+        .web-nav a,
+        .web-nav a:visited{ color:#111; }
+
+        /* 3) 우측 로그인/유저 영역 색(웹) */
+        .web-login,
+        .web-login a,
+        .web-login a:visited{ color: var(--muted); }
+
+        /* (선택) 호버 시만 밑줄 */
+        .web-header a:hover,
+        .appbar a:hover{ text-decoration: underline; }
+    </style>
 </head>
 <body>
-<header>쓰레기 해결</header>
+<!--네비-->
+<div class="dg-app-nav">
+    <div class="appbar">
+        <div class="row">
+            <div class="brand"><a href="/">동구라미 온</a></div>
 
+            <div class="menu">
+                <a href="/trash/reportPage">지도</a>
+                <a href="#">참여</a>
+                <a href="#">센터</a>
+                <a href="#">정보</a>
+            </div>
+
+            <div class="login">
+                <!-- 로그인 전 -->
+                <a th:if="${#strings.isEmpty(session.user_id)}" th:href="@{/user/login}">로그인</a>
+
+                <!-- 로그인 후 -->
+                <a th:unless="${#strings.isEmpty(session.user_id)}" th:href="@{/user/myPage}">내 정보</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 웹 네비: 768px 이상에서만 보임 -->
+<div class="dg-web-nav">
+    <header class="web-header">
+        <div class="row">
+            <div class="web-brand"><a href="/">동구라미 온</a></div>
+
+            <nav class="web-nav">
+                <a href="/trash/reportPage">지도</a>
+                <a href="#">참여</a>
+                <a href="#">센터</a>
+                <a href="#">정보</a>
+            </nav>
+
+            <!-- 로그인 전 -->
+            <a class="web-login" th:if="${#strings.isEmpty(session.user_id)}" th:href="@{/user/login}">로그인</a>
+
+            <!-- 로그인 후 -->
+            <div class="web-login" th:unless="${#strings.isEmpty(session.user_id)}">
+                <a th:href="@{/user/myPage}">내 정보</a>
+                <span aria-hidden="true"> | </span>
+                <a th:href="@{/user/logOut}">로그아웃</a>
+            </div>
+        </div>
+    </header>
+</div>
+
+<!---->
+<header>쓰레기 해결</header>
 <div class="container">
     <div class="map-wrap"><div id="map"></div></div>
 
@@ -279,7 +396,7 @@
 <script src="https://cdn.jsdelivr.net/npm/exifr/dist/exifr.umd.js" defer></script>
 
 <script th:inline="javascript">
-    // const data =  [[${rList}]];
+    const data =  [[${rList}]];
     console.log(data);
 
     /************ 목록: 웹/앱 대응 ************/

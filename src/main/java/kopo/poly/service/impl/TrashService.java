@@ -49,6 +49,8 @@ public class TrashService implements ITrashService {
             rDTO.setProof_image_url(url);
         }
 
+        trashMapper.sumUserPoint(rDTO.getReport_id(), rDTO.getResolver_id());
+
         log.info(this.getClass().getName() + "TrashService.reportSolution End!!");
         return trashMapper.reportSolution(rDTO);
     }
