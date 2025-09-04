@@ -128,3 +128,8 @@ a{text-decoration:none}
 /* 반응형 미세조정 */
 @media (max-width:1024px){ .hero h1{font-size:24px} }
 @media (max-width:768px){ .web-container{padding:0 12px 36px} }
+
+/* 앱모드에서 페이지 내부 상단행은 숨김(중복 헤더 제거) */
+@media (max-width: 768px){
+  .appbar .row{ display:none !important; }
+}
