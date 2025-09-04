@@ -93,6 +93,24 @@ public class UserController {
         return "index";
     }
 
+
+    @GetMapping(value = "")
+    public String index(HttpSession session, ModelMap model, HttpServletRequest request) throws Exception {
+        log.info(this.getClass().getName() + ".login Start!");
+
+        String user_id = CmmUtil.nvl(session.getAttribute("user_id").toString());
+
+        UserDTO uDTO = new UserDTO();
+
+        uDTO = userService.getUserInfo(user_id);
+        List<ReportCreDTO> rList = trashService.selectAllTrash();
+
+        model.addAttribute("size", rList.size());
+        model.addAttribute("uDTO", uDTO);
+
+        return "index";
+    }
+
     //회원가입처리
     @PostMapping(value = "signUpProc")
     @ResponseBody
@@ -213,4 +231,6 @@ public class UserController {
         log.info(this.getClass().getName() + "logOut End!");
         return "index";
     }
+
+
 }

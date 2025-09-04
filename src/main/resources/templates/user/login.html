@@ -10,147 +10,211 @@
           href="https://cdn.materialdesignicons.com/4.8.95/css/materialdesignicons.min.css">
     <link rel="stylesheet"
           href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+
+    <style>
+        #auth-page{
+            --brand:#2563eb; --ink:#111; --muted:#6b7280; --line:#e5e7eb; --card:#fff; --bg:#f9fafb;
+            font-family: "Karla", system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", Arial, sans-serif;
+            color:var(--ink); background:var(--bg); min-height:100vh;
+        }
+        #auth-page .ap-shell{min-height:100vh}
+
+        /* ===== Aside (좌측) ===== */
+        #auth-page .ap-aside{position:relative; align-items:flex-end; overflow:hidden}
+        #auth-page .ap-img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
+        #auth-page .ap-overlay{position:absolute; inset:0; background:linear-gradient(120deg, rgba(37,99,235,.65), rgba(37,99,235,.15))}
+        #auth-page .ap-aside-inner{position:relative; z-index:2; padding:48px; color:#fff; max-width:520px}
+        #auth-page .ap-badge{display:inline-block; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35); color:#fff;
+            padding:6px 12px; border-radius:999px; font-weight:700; margin-bottom:14px; backdrop-filter: blur(4px);}
+        #auth-page .ap-aside h2{font-weight:800; line-height:1.2; margin:0 0 8px}
+        #auth-page .ap-aside p{opacity:.9; margin:0}
+
+        /* ===== Right Pane / Card ===== */
+        #auth-page .ap-pane{display:flex; align-items:center; justify-content:center; padding:32px}
+        #auth-page .ap-card{width:100%; max-width:520px; background:var(--card); border:1px solid var(--line);
+            border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,.06); padding:24px 24px 28px}
+
+        /* Tabs */
+        #auth-page .ap-tabs{display:flex; gap:8px; margin-bottom:14px}
+        #auth-page .ap-tab{
+            flex:1; padding:14px 12px; border-radius:12px; border:1px solid var(--line); background:#fff;
+            font-weight:800; letter-spacing:.5px; color:var(--muted); transition:.2s; cursor:pointer;
+        }
+        #auth-page .ap-tab.active{color:#fff; background:var(--brand); border-color:var(--brand); box-shadow:0 8px 20px rgba(37,99,235,.25)}
+        #auth-page .ap-tab:disabled{cursor:default}
+
+        /* Form */
+        #auth-page .ap-form{margin-top:8px}
+        #auth-page .ap-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+        @media (max-width: 992px){ #auth-page .ap-grid{grid-template-columns:1fr} }
+
+        #auth-page .ap-field label{font-size:14px; color:var(--muted); margin-bottom:6px}
+        #auth-page .ap-input{position:relative}
+        #auth-page .ap-input i.mdi{position:absolute; left:12px; top:50%; transform:translateY(-50%); opacity:.6}
+        #auth-page .ap-input .form-control{padding-left:40px; height:44px; border-radius:12px; border:1px solid var(--line)}
+        #auth-page .ap-input .form-control:focus{box-shadow:none; border-color:var(--brand)}
+        #auth-page .ap-chip{
+            position:absolute; right:6px; top:6px; height:32px; padding:0 10px; border-radius:999px;
+            border:1px solid var(--line); background:#f8fafc; color:#111; font-size:12px;
+        }
+
+        #auth-page .ap-radio-row{display:flex; gap:14px; align-items:center}
+        #auth-page .ap-eye{
+            position:absolute; right:6px; top:6px; width:32px; height:32px; display:grid; place-items:center;
+            border:none; background:transparent; color:#6b7280;
+        }
+
+        #auth-page .ap-btn{display:inline-flex; align-items:center; justify-content:center; gap:8px;
+            height:46px; border-radius:12px; border:1px solid var(--line); background:#fff; font-weight:700}
+        #auth-page .ap-btn:hover{filter:brightness(.98)}
+        #auth-page .ap-primary{background:var(--brand); color:#fff; border-color:var(--brand)}
+        #auth-page .ap-hint{margin:12px 0 0; color:var(--muted); text-align:center}
+        #auth-page .ap-hint a{color:var(--brand); text-decoration:none}
+
+    </style>
 </head>
 <body>
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-sm-4 login-section-wrapper">
-        </div>
-        <div class="login-wrapper my-auto">
-            <div>
-                <button id="loginButton" style="border: 0; background: none;"
-                        onclick="signIn()" disabled>
-                    <h1 class="login-title" id="loginFont" style="color: #000;">SIGN
-                        IN</h1>
-                </button>
-                <button id="signupButton" style="border: 0; background: none;"
-                        onclick="signUp()">
-                    <h1 class="login-title" id="signupFont" style="color: #ced4da;">SIGN UP</h1>
-                </button>
+
+
+<div id="auth-page" class="container-fluid">
+    <div class="ap-shell row no-gutters">
+        <!-- 왼쪽 비주얼 -->
+        <aside class="ap-aside d-none d-lg-flex col-lg-6">
+            <div class="ap-aside-inner">
+                <div class="ap-badge">동구라미 온</div>
+                <h2>친환경 생활, 오늘부터 가볍게</h2>
+                <p>참여하고, 포인트도 모으고, 우리 동네가 바뀌는 걸 지켜보세요.</p>
             </div>
-            <div id="loginPage">
-                <form id="loginForm" action="/user/loginProc" method="post">
-                    <div class="form-group">
-                        <label for="email">아이디</label> <input name="user_id" id="user_id"
-                                                              class="form-control" placeholder="enter your ID">
-                    </div>
-                    <div class="form-group mb-4">
-                        <label for="password">비밀번호</label> <input type="password"
-                                                                  name="user_pwd" id="user_pwd" class="form-control"
-                                                                  placeholder="enter your passsword">
-                    </div>
-                    <button type="submit">로그인</button>
-                </form>
+            <div class="ap-overlay"></div>
+        </aside>
+
+        <!-- 오른쪽 폼 카드 -->
+        <section class="ap-pane col-12 col-lg-6">
+            <div class="ap-card">
+                <!-- 탭 -->
+                <div class="ap-tabs">
+                    <button id="loginButton" class="ap-tab active" onclick="signIn()" disabled>SIGN IN</button>
+                    <button id="signupButton" class="ap-tab" onclick="signUp()">SIGN UP</button>
+                </div>
+
+                <!-- 로그인 -->
+                <div id="loginPage">
+                    <form id="loginForm" action="/user/loginProc" method="post" class="ap-form">
+                        <div class="ap-field">
+                            <label for="user_id">아이디</label>
+                            <div class="ap-input">
+                                <i class="mdi mdi-account-outline"></i>
+                                <input name="user_id" id="user_id" class="form-control" placeholder="enter your ID">
+                            </div>
+                        </div>
+
+                        <div class="ap-field">
+                            <label for="user_pwd">비밀번호</label>
+                            <div class="ap-input">
+                                <i class="mdi mdi-lock-outline"></i>
+                                <input type="password" name="user_pwd" id="user_pwd" class="form-control" placeholder="enter your password">
+                                <button type="button" class="ap-eye" data-target="#user_pwd"><i class="mdi mdi-eye-outline"></i></button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="ap-btn ap-primary w-100">로그인</button>
+                        <p class="ap-hint">처음이신가요? <a href="javascript:void(0)" onclick="signUp()">회원가입</a></p>
+                    </form>
+                </div>
+
+                <!-- 회원가입 -->
+                <div id="signupPage" style="display:none">
+                    <form class="ap-form" onsubmit="return false;">
+                        <div class="ap-grid">
+                            <div class="ap-field">
+                                <label for="user_signup_id">아이디</label>
+                                <div class="ap-input">
+                                    <i class="mdi mdi-account-plus-outline"></i>
+                                    <input id="user_signup_id" class="form-control" placeholder="enter your ID">
+                                    <button type="button" id="btnCheckId" class="ap-chip" onclick="checkId()">중복확인</button>
+                                </div>
+                                <small id="idHelp" class="form-text"></small>
+                                <input type="hidden" id="idChecked" value="false">
+                            </div>
+
+                            <div class="ap-field">
+                                <label for="user_signup_pwd">비밀번호</label>
+                                <div class="ap-input">
+                                    <i class="mdi mdi-lock-outline"></i>
+                                    <input type="password" id="user_signup_pwd" class="form-control" placeholder="enter your password">
+                                    <button type="button" class="ap-eye" data-target="#user_signup_pwd"><i class="mdi mdi-eye-outline"></i></button>
+                                </div>
+                            </div>
+
+                            <div class="ap-field">
+                                <label for="user_signup_checkpwd">비밀번호 재확인</label>
+                                <div class="ap-input">
+                                    <i class="mdi mdi-lock-check-outline"></i>
+                                    <input type="password" id="user_signup_checkpwd" class="form-control" placeholder="check your password">
+                                    <button type="button" class="ap-eye" data-target="#user_signup_checkpwd"><i class="mdi mdi-eye-outline"></i></button>
+                                </div>
+                            </div>
+
+                            <div class="ap-field">
+                                <label for="user_nick_name">닉네임</label>
+                                <div class="ap-input">
+                                    <i class="mdi mdi-account-heart-outline"></i>
+                                    <input id="user_nick_name" class="form-control" placeholder="예: 그린워커">
+                                </div>
+                            </div>
+
+                            <div class="ap-field">
+                                <label class="d-block">출퇴근 시 자차 이용 여부</label>
+                                <div class="ap-radio-row">
+                                    <label><input type="radio" name="commute_by_car" value="true"> 예</label>
+                                    <label><input type="radio" name="commute_by_car" value="false" checked> 아니오</label>
+                                </div>
+                            </div>
+
+                            <div class="ap-field">
+                                <label for="cafe_use_freq">카페 이용 빈도</label>
+                                <select id="cafe_use_freq" class="form-control">
+                                    <option value="" selected disabled>선택하세요</option>
+                                    <option>거의 안 감</option><option>월1~2회</option><option>주1~2회</option><option>주3회 이상</option>
+                                </select>
+                            </div>
+
+                            <div class="ap-field">
+                                <label for="grocery_freq">장보기 빈도</label>
+                                <select id="grocery_freq" class="form-control">
+                                    <option value="" selected disabled>선택하세요</option>
+                                    <option>거의 안 감</option><option>월1회</option><option>주1회</option><option>주2회 이상</option>
+                                </select>
+                            </div>
+
+                            <div class="ap-field">
+                                <label class="d-block">에너지 절약 실천 여부</label>
+                                <div class="ap-radio-row">
+                                    <label><input type="radio" name="practice_energy_saving" value="true"> 예</label>
+                                    <label><input type="radio" name="practice_energy_saving" value="false" checked> 아니오</label>
+                                </div>
+                            </div>
+
+                            <div class="ap-field">
+                                <label for="residence_dong">거주 행정동</label>
+                                <input id="residence_dong" class="form-control" placeholder="예: 효자동">
+                            </div>
+
+                            <div class="ap-field">
+                                <label for="workplace_or_school_dong">직장/학교 행정동</label>
+                                <input id="workplace_or_school_dong" class="form-control" placeholder="예: 석사동">
+                            </div>
+                        </div>
+
+                        <button class="ap-btn ap-primary w-100" onclick="signupProc()">회원가입</button>
+                        <p class="ap-hint">이미 계정이 있나요? <a href="javascript:void(0)" onclick="signIn()">로그인</a></p>
+                    </form>
+                </div>
             </div>
-
-            <div id="signupPage" style="display: none">
-                <div class="form-group">
-                    <label for="email">아이디</label> <input name="signupId"
-                                                          id="user_signup_id" class="form-control" placeholder="enter your ID">
-                    <div class="input-group">
-                        <button type="button" id="btnCheckId" class="btn btn-outline-secondary" onclick="checkId();">중복확인</button>
-                    </div>
-
-                    <small id="idHelp" class="form-text"></small>
-                    <!-- 중복확인 완료 여부를 보관하는 hidden 필드 -->
-                    <input type="hidden" id="idChecked" value="false">
-
-
-                </div>
-                <div class="form-group mb-4">
-                    <label for="password">비밀번호</label> <input type="password"
-                                                              name="signupPwd" id="user_signup_pwd" class="form-control"
-                                                              placeholder="enter your passsword">
-                </div>
-                <div class="form-group mb-4">
-                    <label for="password">비밀번호 재확인</label> <input type="password"
-                                                                  name="checkPwd" id="user_signup_checkpwd" class="form-control"
-                                                                  placeholder="check your passsword">
-                </div>
-
-                <hr class="my-4">
-
-                <!-- 추가: 유저 닉네임 -->
-                <div class="form-group">
-                    <label for="user_nick_name">닉네임</label>
-                    <input name="user_nick_name" id="user_nick_name" class="form-control" placeholder="예: 그린워커">
-                </div>
-
-                <!-- 추가: 교통 습관 (자차 출퇴근 여부) -->
-                <div class="form-group">
-                    <label class="d-block">출퇴근 시 자차 이용 여부</label>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="commute_by_car" id="commute_by_car_yes" value="true">
-                        <label class="form-check-label" for="commute_by_car_yes">예</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="commute_by_car" id="commute_by_car_no" value="false" checked>
-                        <label class="form-check-label" for="commute_by_car_no">아니오</label>
-                    </div>
-                </div>
-
-                <!-- 추가: 소비 습관 - 카페 이용 빈도 -->
-                <div class="form-group">
-                    <label for="cafe_use_freq">카페 이용 빈도</label>
-                    <select name="cafe_use_freq" id="cafe_use_freq" class="form-control">
-                        <option value="" selected disabled>선택하세요</option>
-                        <option value="거의 안 감">거의 안 감</option>
-                        <option value="월1~2회">월 1~2회</option>
-                        <option value="주1~2회">주 1~2회</option>
-                        <option value="주3회 이상">주 3회 이상</option>
-                    </select>
-                </div>
-
-                <!-- 추가: 소비 습관 - 장보기 빈도 -->
-                <div class="form-group">
-                    <label for="grocery_freq">장보기 빈도</label>
-                    <select name="grocery_freq" id="grocery_freq" class="form-control">
-                        <option value="" selected disabled>선택하세요</option>
-                        <option value="거의 안 감">거의 안 감</option>
-                        <option value="월1회">월 1회</option>
-                        <option value="주1회">주 1회</option>
-                        <option value="주2회 이상">주 2회 이상</option>
-                    </select>
-                </div>
-
-                <!-- 추가: 에너지 절약 실천 여부 -->
-                <div class="form-group">
-                    <label class="d-block">에너지 절약 실천 여부</label>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="practice_energy_saving" id="practice_energy_saving_yes" value="true">
-                        <label class="form-check-label" for="practice_energy_saving_yes">예</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="practice_energy_saving" id="practice_energy_saving_no" value="false" checked>
-                        <label class="form-check-label" for="practice_energy_saving_no">아니오</label>
-                    </div>
-                </div>
-
-                <!-- 추가: 생활 지역 - 거주 행정동 -->
-                <div class="form-group">
-                    <label for="residence_dong">거주 행정동</label>
-                    <input name="residence_dong" id="residence_dong" class="form-control" placeholder="예: 효자동">
-                </div>
-
-                <!-- 추가: 생활 지역 - 직장/학교 행정동 -->
-                <div class="form-group">
-                    <label for="workplace_or_school_dong">직장/학교 행정동</label>
-                    <input name="workplace_or_school_dong" id="workplace_or_school_dong" class="form-control" placeholder="예: 석사동">
-                </div>
-
-
-
-                <input name="login" class="btn btn-block login-btn" type="button"
-                       value="SignUp" onclick="signupProc()">
-            </div>
-        </div>
-    </div>
-    <div class="col-sm-8 px-0 d-none d-sm-block">
-        <img src="/assets/images/healingMain.jpg" alt="login image"
-             class="login-img">
+        </section>
     </div>
 </div>
-</div>
+
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 <script
         src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
@@ -158,28 +222,34 @@
         src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
 <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 <script>
-    function signIn() {
+    // 탭 토글 (기존 signIn/signUp 유지)
+    function signIn(){
         document.getElementById('loginPage').style = "";
         document.getElementById('signupPage').style = "display:none";
-        document.getElementById('loginFont').style = "color:#000";
-        document.getElementById('signupFont').style = "color:#ced4da";
-        let button_a = document.getElementById('loginButton');
-        let button_b = document.getElementById('signupButton');
-
-        button_a.disabled = true;
-        button_b.disabled = false;
+        document.getElementById('loginButton').classList.add('active');
+        document.getElementById('signupButton').classList.remove('active');
+        document.getElementById('loginButton').disabled = true;
+        document.getElementById('signupButton').disabled = false;
     }
-    function signUp() {
+    function signUp(){
         document.getElementById('loginPage').style = "display:none";
-        document.getElementById('signupPage').style = ""
-        document.getElementById('loginFont').style = "color:#ced4da";
-        document.getElementById('signupFont').style = "color:#000";
-        let button_a = document.getElementById('loginButton');
-        let button_b = document.getElementById('signupButton');
-
-        button_a.disabled = false;
-        button_b.disabled = true;
+        document.getElementById('signupPage').style = "";
+        document.getElementById('signupButton').classList.add('active');
+        document.getElementById('loginButton').classList.remove('active');
+        document.getElementById('loginButton').disabled = false;
+        document.getElementById('signupButton').disabled = true;
     }
+
+    // 비밀번호 보이기/숨기기
+    document.addEventListener('click', (e)=>{
+        const btn = e.target.closest('.ap-eye');
+        if(!btn) return;
+        const input = document.querySelector(btn.dataset.target);
+        if(!input) return;
+        const isPw = input.type === 'password';
+        input.type = isPw ? 'text' : 'password';
+        btn.innerHTML = isPw ? '<i class="mdi mdi-eye-off-outline"></i>' : '<i class="mdi mdi-eye-outline"></i>';
+    });
 </script>
 
 <script>
@@ -290,10 +360,8 @@
             },
             success: function(result) {
                 if (result === "success") {
-                    if (window.parent && window.parent.closeLoginModal) {
-                        window.parent.closeLoginModal();
-                        window.parent.location.reload();
-                    }
+                    alert("회원가입 성공 !!!");
+                    window.location.href = '/';
                 } else {
                     alert("회원가입 실패: " + result);
                 }

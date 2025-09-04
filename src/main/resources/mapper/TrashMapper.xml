@@ -95,12 +95,12 @@
         WHERE user_id = #{userId}
     </select>
 
-    <update id="sumUserPoint" parameterType="String">
+    <update id="sumUserPoint">
         update users
         set point = (
-            select point from trash_report where report_id = #{report_id}
+            select point from trash_report where report_id = #{param1}
             )
-        WHERE user_id = #{user_id}
+        WHERE user_id = #{param2}
     </update>
 
 
