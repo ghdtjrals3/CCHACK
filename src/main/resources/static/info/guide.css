@@ -1,7 +1,21 @@
+/* guide.css — 가이드/테이블/콘텐츠 전용(네비 제거) */
 :root{
   --bg:#f6f8fb; --card:#fff; --ink:#111; --muted:#6b7280; --accent:#3b82f6;
   --shadow:0 10px 24px rgba(0,0,0,.06); --radius:18px;
+  --line:#eef2f7;
+  --max-web:1100px;
 }
+
+*{box-sizing:border-box}
+html,body{height:100%}
+html,body{
+  margin:0; color:var(--ink); background:var(--bg);
+  font-family:system-ui,-apple-system,"Noto Sans KR",Segoe UI,Roboto,Apple SD Gothic Neo,sans-serif;
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+}
+img{max-width:100%; display:block}
+a{text-decoration:none}
+
 .container{max-width:1100px;margin:24px auto;padding:0 16px}
 .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin:12px 0}
 .card.lg{padding:24px}
@@ -14,9 +28,9 @@
 .section h2{font-size:20px;font-weight:700;margin:0 0 10px}
 .para{margin:6px 0 8px}
 .bullets{margin:8px 0 0 18px}
-.table-wrap{width:100%;overflow:auto;border-radius:12px;border:1px solid #eef2f7;margin-top:10px}
+.table-wrap{width:100%;overflow:auto;border-radius:12px;border:1px solid var(--line);margin-top:10px}
 .table{width:100%;border-collapse:collapse;min-width:680px;background:#fff}
-.table th,.table td{padding:10px 12px;border-bottom:1px solid #eef2f7;text-align:left;vertical-align:top}
+.table th,.table td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
 .table thead th{background:#f7f9fc;font-weight:700}
 
 /* 반응형 */
@@ -32,62 +46,3 @@
   .tabs{position:sticky;top:56px;background:var(--bg);padding:8px 0;z-index:5}
   .table{min-width:540px}
 }
-/* ====== 상단 네비게이션(데스크톱) ====== */
-.site-header{
-  position: sticky; top: 0; z-index: 100;
-  background: rgba(255,255,255,.9);
-  backdrop-filter: saturate(180%) blur(12px);
-  border-bottom:1px solid #eef2f7;
-}
-.site-header .inner{
-  max-width:1100px; margin:0 auto; padding:10px 16px;
-  display:flex; align-items:center; gap:16px;
-}
-.site-header .brand{
-  font-weight:800; font-size:18px; color:#1d4ed8; text-decoration:none;
-}
-.nav-links{ display:flex; gap:10px; margin-left:8px; }
-.nav-link{
-  padding:6px 12px; border-radius:999px; text-decoration:none;
-  color:#374151; border:1px solid transparent;
-}
-.nav-link.active{
-  background:#e9f0ff; color:#1d4ed8; border-color:#cfe3ff;
-  box-shadow: inset 0 0 0 1px rgba(207,227,255,.6);
-}
-.auth{ margin-left:auto; display:flex; gap:8px; }
-.btn{ padding:6px 12px; border-radius:999px; border:1px solid #e5e7eb; background:#fff; color:#111; text-decoration:none; }
-.btn.primary{ background:#3b82f6; color:#fff; border-color:#3b82f6; }
-
-/* ====== 모바일 하단 탭 ====== */
-.bottom-nav{ display:none; }
-@media (max-width: 768px){
-  .nav-links, .auth{ display:none; } /* 상단 탭 숨김 */
-  .bottom-nav{
-    display:flex; position:fixed; left:0; right:0; bottom:0; height:64px;
-    background:rgba(255,255,255,.98);
-    backdrop-filter: saturate(180%) blur(10px);
-    border-top:1px solid #e5e7eb; z-index:120;
-  }
-  .bn-inner{
-    max-width:1100px; margin:0 auto; width:100%;
-    display:flex; justify-content:space-around; align-items:center; height:100%;
-  }
-  .bn-item{
-    display:flex; flex-direction:column; align-items:center; gap:4px;
-    text-decoration:none; color:#6b7280; font-size:12px;
-  }
-  .bn-item .ic{ font-size:20px; line-height:1; }
-  .bn-item.active{ color:#1d4ed8; }
-  /* 하단 탭과 겹치지 않도록 패딩 확보 + iOS 안전영역 */
-  body{ padding-bottom: calc(74px + env(safe-area-inset-bottom)); }
-}
-
-/* (선택) 좁은 폭에서 페이지 타이틀/카드 여백 스케일 */
-@media (max-width: 1024px){ .page-title{font-size:24px} }
-@media (max-width: 768px){
-  .container{padding:0 12px}
-  .card{border-radius:14px;padding:16px}
-  .page-title{font-size:22px}
-}
-

@@ -8,41 +8,57 @@
     />
     <title>춘천시 생활쓰레기 안내</title>
 
+    <!-- 공통 네비게이션 CSS -->
+    <link rel="stylesheet" th:href="@{../nav.css}" />
+    <!-- 페이지 전용 CSS -->
     <link rel="stylesheet" th:href="@{/info/guide.css}" />
   </head>
   <body>
     <!-- 상단 네비게이션 -->
     <header class="site-header">
       <div class="inner">
-        <a class="brand" href="/">동구라미 온</a>
-
+        <a class="brand" href="http://localhost:11000/">동구라미 온</a>
         <nav class="nav-links">
-          <a class="nav-link" data-route="/" href="/">홈</a>
+          <a class="nav-link" data-route="/" href="http://localhost:11000/"
+            >홈</a
+          >
           <a
             class="nav-link"
             data-route="/trash/reportPage"
-            href="/trash/reportPage"
+            href="http://localhost:11000/trash/reportPage"
             >지도</a
           >
           <a
             class="nav-link"
             data-route="/personal/mission"
-            href="/personal/mission"
+            href="http://localhost:11000/personal/mission"
             >참여</a
           >
-          <a class="nav-link" data-route="/center" href="/center">센터</a>
-          <a class="nav-link" data-route="/info" href="/info/guide">정보</a>
+          <a
+            class="nav-link"
+            data-route="/center"
+            href="http://localhost:11000/center"
+            >센터</a
+          >
+          <a
+            class="nav-link"
+            data-route="/info"
+            href="http://localhost:11000/info/guide"
+            >정보</a
+          >
         </nav>
-
         <div class="auth">
-          <a class="btn primary" href="/login">로그인</a>
-          <a class="btn" href="/me">내 정보</a>
+          <a class="btn primary" href="http://localhost:11000/user/login"
+            >로그인</a
+          >
+          <a class="btn" href="http://localhost:11000/me">내 정보</a>
         </div>
       </div>
     </header>
 
     <div class="safe"></div>
     <main class="container">
+      <!-- 내용 부분은 기존 그대로 유지 -->
       <section class="card lg">
         <h1 class="page-title">생활쓰레기 배출 안내</h1>
         <div class="kv">
@@ -66,13 +82,13 @@
         </div>
       </section>
 
+      <!-- 이하 섹션들 (tabs, recy, food, class, comp) 원래 코드 그대로 유지 -->
       <div class="tabs">
         <button class="tab active" data-tab="recy">재활용</button>
         <button class="tab" data-tab="food">음식물</button>
         <button class="tab" data-tab="class">분리배출 기준</button>
         <button class="tab" data-tab="comp">수거업체</button>
       </div>
-
       <!-- 재활용 -->
       <section id="recy" class="card section">
         <h2 th:text="${g.recyclable.title}">재활용</h2>
@@ -108,7 +124,6 @@
           >
         </div>
       </section>
-
       <!-- 음식물 -->
       <section id="food" class="card section" hidden>
         <h2 th:text="${g.food.title}">음식물쓰레기</h2>
@@ -138,7 +153,6 @@
           <a th:href="${g.food.sourceUrl}" target="_blank">음식물 안내 원문</a>
         </div>
       </section>
-
       <!-- 분리배출 -->
       <section id="class" class="card section" hidden>
         <h2 th:text="${g.classification.title}">분리배출 기준</h2>
@@ -174,7 +188,6 @@
           >
         </div>
       </section>
-
       <!-- 수거업체 -->
       <section id="comp" class="card section" hidden>
         <h2>생활쓰레기 수거업체</h2>
@@ -201,22 +214,28 @@
           <a href="/info/guide.json" target="_blank">JSON 보기</a>
         </div>
       </section>
-
       <section class="card src">
         본 페이지는 춘천시 공식 페이지 공개 정보를 요약/표로 가공해 제공합니다.
         최신 내용은 시청 고지/조례를 우선합니다.
       </section>
+      <!-- ... -->
     </main>
+
     <!-- 모바일 하단 탭바 -->
     <nav class="bottom-nav" aria-label="하단탭">
       <div class="bn-inner">
-        <a class="bn-item" data-route="/" href="/" aria-label="홈">
+        <a
+          class="bn-item"
+          data-route="/"
+          href="http://localhost:11000/"
+          aria-label="홈"
+        >
           <span class="ic">🏠</span><span>홈</span>
         </a>
         <a
           class="bn-item"
           data-route="/trash/reportPage"
-          href="/trash/reportPage"
+          href="http://localhost:11000/trash/reportPage"
           aria-label="지도"
         >
           <span class="ic">🗺️</span><span>지도</span>
@@ -224,7 +243,7 @@
         <a
           class="bn-item"
           data-route="/personal/mission"
-          href="/personal/mission"
+          href="http://localhost:11000/personal/mission"
           aria-label="참여"
         >
           <span class="ic">🤝</span><span>참여</span>
@@ -232,7 +251,7 @@
         <a
           class="bn-item"
           data-route="/center"
-          href="/center"
+          href="http://localhost:11000/center"
           aria-label="센터"
         >
           <span class="ic">🏢</span><span>센터</span>
@@ -240,7 +259,7 @@
         <a
           class="bn-item"
           data-route="/info"
-          href="/info/guide"
+          href="http://localhost:11000/info/guide"
           aria-label="정보"
         >
           <span class="ic">ℹ️</span><span>정보</span>
