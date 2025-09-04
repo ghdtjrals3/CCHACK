@@ -10,6 +10,7 @@ import kopo.poly.service.ITrashService;
 import kopo.poly.service.IUserService;
 import kopo.poly.util.CmmUtil;
 import kopo.poly.util.PointUtil;
+import kopo.poly.util.SimpleScore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -19,6 +20,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 @Slf4j
@@ -53,15 +55,23 @@ public class TrashController {
         rDTO.setReporter_id(user_id);
         rDTO.setTitle(title);
 
+        log.info(request.getParameter("addr"));
+        rDTO.setAddr(request.getParameter("addr"));
+
 
         String residence_dong = trashService.getDong(user_id);
         log.info("resi dong : " + residence_dong);
 
-        int point = PointUtil.postMissionScorePoint(1,lan, lon, title, residence_dong);
+        SimpleScore scorer = new SimpleScore(
+                "classpath:popdatas/dongpopulation.csv",
+                "classpath:popdatas/population.csv",
+                0.6
+        );
+        int point = scorer.scoreReport(request.getParameter("addr"), title);
+//        int point = scorer.scoreReport("충열로30", title);
         log.info("point : " + point);
 
         rDTO.setPoint(point);
-
 
 
         trashService.reportProc(rDTO,image);
@@ -98,18 +108,18 @@ public String reportPage(HttpSession session, Model model) throws Exception {
     log.info(this.getClass().getName() + " reportPage Start!!");
 
     ReportCreDTO rDTO = new ReportCreDTO();
-    // List<ReportCreDTO> rList = trashService.selectAllTrash();
+     List<ReportCreDTO> rList = trashService.selectAllTrash();
 
-    // model.addAttribute("rList", rList);
+     model.addAttribute("rList", rList);
 
-    // for (ReportCreDTO rDTO2 : rList) {
-    //     log.info("report_id : {}", rDTO2.getReport_id());
-    //     log.info("reporter_id : {}", rDTO2.getReporter_id());
-    // }
+     for (ReportCreDTO rDTO2 : rList) {
+         log.info("report_id : {}", rDTO2.getReport_id());
+         log.info("reporter_id : {}", rDTO2.getReporter_id());
+     }
 
-    // // 충돌난 부분을 이렇게 정리
-    // log.info("size : {}", rList.size());
-    // log.info("id : {}", CmmUtil.nvl((String) session.getAttribute("user_id")));
+     // 충돌난 부분을 이렇게 정리
+     log.info("size : {}", rList.size());
+     log.info("id : {}", CmmUtil.nvl((String) session.getAttribute("user_id")));
 
     log.info(this.getClass().getName() + " reportPage End!!");
 

@@ -192,7 +192,7 @@ a{text-decoration:none}
               <a class="right-link" href="user/login" th:if="${uDTO == null or uDTO.user_id == null}">로그인</a>
           </div>
       </article>
-      <article class="card"><div class="card-h"><div class="icon">🚨</div><div class="meta"><div class="title">쓰레기 신고 · 해결</div><div class="muted">8건이 기다리고 있어요. 참여하면 포인트도 모아봐요!</div></div><a class="right-link" href="#">해결하기 ›</a></div></article>
+      <article class="card"><div class="card-h"><div class="icon">🚨</div><div class="meta"><div class="title" th:text="|${size ?: 0}건이 기다리고 있어요. 참여하면 포인트도 모아봐요!|">쓰레기 신고 · 해결</div><div class="muted">8건이 기다리고 있어요. 참여하면 포인트도 모아봐요!</div></div><a class="right-link" href="#">해결하기 ›</a></div></article>
       <article class="card"><div class="card-h"><div class="icon">🗑️</div><div class="meta"><div class="title">스마트 배출함</div><div class="muted">우유팩 수거기 · 01번 배출함</div></div><a class="right-link" href="#">더보기 ›</a></div></article>
       <article class="card"><div class="card-h"><div class="icon">🏪</div><div class="meta"><div class="title">동구라미가게</div><div class="muted">친환경자원순환센터, 동구문화센터</div></div><a class="right-link" href="#">더보기 ›</a></div></article>
 
@@ -269,7 +269,7 @@ a{text-decoration:none}
           <span class="muted" th:if="${uDTO == null or uDTO.user_id == null}">로그인을 진행해주세요.</span>
           <span class="muted" th:unless="${uDTO == null or uDTO.user_id == null}">보유 포인트: <span th:text="${uDTO.point}">0</span>P</span>
       </div>
-      <div class="wcard"><strong>쓰레기 신고 · 해결</strong><br><span class="muted" th:text="|${size}건이 기다리고 있어요.|">0건이 기다리고 있어요.</span></div>
+      <div class="wcard"><strong>쓰레기 신고 · 해결</strong><br><span class="muted" th:text="|${size ?: 0}건이 기다리고 있어요.|">0건이 기다리고 있어요.</span></div>
       <div class="wcard"><strong>스마트 배출함</strong><br><span class="muted">우유팩 수거기 · 01번 배출함</span></div>
       <div class="wcard"><strong>동구라미가게</strong><br><span class="muted">친환경자원순환센터, 동구문화센터</span></div>
     </div>

@@ -31,6 +31,7 @@ public class ReportCreDTO {
     private String note;
     private String proof_image_url;
     private LocalDateTime solved_at;
+    private String addr;
 
 }
 

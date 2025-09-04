@@ -1,8 +1,19 @@
 package kopo.poly.util;
 
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class CmmUtil {
@@ -62,5 +73,35 @@ public class CmmUtil {
         return "/uploads/" + (subfolder == null || subfolder.isBlank() ? "" : subfolder + "/") + filename;
     }
 
+
+    public static List<Map<String, String>> readCsvAsMaps(String location) throws Exception {
+        if (location == null || location.isBlank()) {
+            throw new IllegalArgumentException("CSV 경로가 null/blank 입니다.");
+        }
+
+        CsvMapper mapper = new CsvMapper();
+        CsvSchema schema = CsvSchema.emptySchema().withHeader();
+
+        if (location.startsWith("classpath:")) {
+            String cp = location.substring("classpath:".length());
+            try (InputStream in = CmmUtil.class.getResourceAsStream(cp.startsWith("/") ? cp : "/" + cp)) {
+                if (in == null) throw new IllegalArgumentException("Classpath 리소스를 찾을 수 없습니다: " + location);
+                try (var br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
+                    MappingIterator<Map<String, String>> it = mapper.readerFor(Map.class).with(schema).readValues(br);
+                    return it.readAll();
+                }
+            }
+        } else {
+            Path p = Path.of(location);
+            if (!Files.exists(p)) {
+                throw new IllegalArgumentException("CSV not found: " + p.toAbsolutePath());
+            }
+            try (var in = Files.newInputStream(p);
+                 var br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
+                MappingIterator<Map<String, String>> it = mapper.readerFor(Map.class).with(schema).readValues(br);
+                return it.readAll();
+            }
+        }
+    }
 
 }
