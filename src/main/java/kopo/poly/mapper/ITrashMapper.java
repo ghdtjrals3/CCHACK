@@ -20,4 +20,6 @@ public interface ITrashMapper {
     List<ReportCreDTO> selectAllSolutionById(String userId) throws Exception;
 
     String getDong(String userId) throws Exception;
+
+    void sumUserPoint(Long reportId, String resolver_id) throws Exception;
 }
