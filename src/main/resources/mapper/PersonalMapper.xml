@@ -3,15 +3,201 @@
 
 <!-- JAVA와 연결할 Mapper 파일 설정 -->
 <mapper namespace="kopo.poly.mapper.IPersonalMapper">
+
+    <!---->
+    <resultMap id="MissionDTOMap" type="kopo.poly.dto.MissionDTO" autoMapping="false">
+        <id     property="id"            column="id"/>
+        <result property="userId"        column="user_id"/>
+        <result property="templateId"    column="template_id"/>
+        <result property="status"        column="status"/>
+        <result property="awardedPoints" column="awarded_points"/>
+        <result property="proofImageUrl" column="proof_image_url"/>
+        <result property="proofNote"     column="proof_note"/>
+        <result property="createdAt"     column="created_at"/>
+    </resultMap>
+
+    <!-- MissionTemplateDTO 매핑 -->
+    <resultMap id="MissionTemplateDTOMap" type="kopo.poly.dto.MissionTemplateDTO">
+        <id     property="id"           column="id"/>
+        <result property="code"         column="code"/>
+        <result property="title"        column="title"/>
+        <result property="verifyType"   column="verify_type"/>
+        <result property="algoKey"      column="algo_key"/>
+        <result property="algoExpected" column="algo_expected"/>
+        <result property="points"       column="points"/>
+    </resultMap>
+
+    <!-- MissionCardDTO 매핑 (카드 화면 전용 JOIN 결과) -->
+    <resultMap id="MissionCardDTOMap" type="kopo.poly.dto.MissionCardDTO">
+        <result property="assignmentId" column="assignment_id"/>  <!-- mc.id -->
+        <result property="templateId"   column="template_id"/>
+        <result property="status"       column="status"/>
+        <result property="awardedPoints" column="awarded_points"/>
+        <result property="code"         column="code"/>
+        <result property="title"        column="title"/>
+        <result property="verifyType"   column="verify_type"/>
+        <result property="algoKey"      column="algo_key"/>
+        <result property="algoExpected" column="algo_expected"/>
+        <result property="points"       column="points"/>
+    </resultMap>
+
+    <!---->
     <update id="goMisson" parameterType="map">
-        UPDATE mission_completion
-        <set>
-            <if test="proofNote != null">       proof_note = #{proofNote},        </if>
-            <if test="proofImageUrl != null">   proof_image_url = #{proofImageUrl},</if>
-            status = 'completed'
-        </set>
-        WHERE user_id = #{userId}
-        AND template_id = #{templateId}
+        <![CDATA[
+        WITH updated AS (
+        UPDATE mission_completion mc
+        SET
+            proof_note       = #{proofNote},
+            proof_image_url  = #{proofImageUrl},
+            status           = 'completed',
+            awarded_points   = COALESCE(#{awardedPoints}, mt.points)
+            FROM mission_template mt
+        WHERE mc.user_id     = #{userId}
+          AND mc.template_id = #{templateId}
+          AND mt.id          = mc.template_id
+          AND mc.status      <> 'completed'   -- 이미 완료된 건 다시 적립 X
+            RETURNING
+            mc.user_id,
+            COALESCE(#{awardedPoints}, mt.points) AS add_points
+            )
+        UPDATE users ua
+        SET point = COALESCE(ua.point, 0) + updated.add_points
+            FROM updated
+        WHERE ua.user_id = updated.user_id
+        ]]>
     </update>
 
+
+    <update id="startTransport" parameterType="map">
+  <![CDATA[
+        UPDATE mission_completion mc
+        SET start_lat = #{startLat},
+            start_lng = #{startLng},
+            start_at  = #{startAt}::timestamptz,
+         updated_at = now()
+        WHERE mc.user_id = #{userId}
+          AND mc.template_id = #{templateId}
+          AND mc.status <> 'completed'
+          AND mc.start_at IS NULL
+        ]]>
+</update>
+
+
+    <!---->
+    <!-- 1) 도전하기: 시작 좌표/시간 저장 (id 반환)
+          파라미터: userId, templateId, startLat, startLng, startAt(옵션)
+          DTO를 안바꿔도 되게 Map으로 받음 -->
+    <select id="insertMissionStart" parameterType="map" resultType="long">
+        INSERT INTO mission_completion (
+            user_id, template_id, status,
+            start_lat, start_lng, start_at, created_at
+        ) VALUES (
+                     #{userId}, #{templateId}, 'STARTED',
+                     #{startLat}, #{startLng}, COALESCE(#{startAt}, now()), now()
+                 )
+            RETURNING id
+    </select>
+
+    <!-- 진행중 미션 찾기 (end_at IS NULL) -->
+    <select id="findActiveMissionId" parameterType="map" resultType="long">
+        SELECT id
+        FROM mission_completion
+        WHERE user_id = #{userId}
+          AND template_id = #{templateId}
+          AND end_at IS NULL
+        ORDER BY id DESC
+            LIMIT 1
+    </select>
+
+
+    <!-- 2) 인증하기: 종료 좌표/시간 저장 + 거리/시간/속도 + 교통수단 판정
+      파라미터: id, userId, endLat, endLng, endAt(옵션) -->
+    <select id="completeMissionAndDetectMode" parameterType="map" resultMap="MissionDTOMap">
+        <![CDATA[
+        WITH calc AS (
+            SELECT
+                COALESCE(#{endAt}::timestamptz, now()) AS e_at,
+                2 * 6371 * ASIN(
+                        SQRT(
+                                POWER(SIN(RADIANS((#{endLat} - mc.start_lat) / 2.0)), 2) +
+                                COS(RADIANS(mc.start_lat)) * COS(RADIANS(#{endLat})) *
+                                POWER(SIN(RADIANS((#{endLng} - mc.start_lng) / 2.0)), 2)
+                        )
+                           ) AS dist_km
+            FROM mission_completion mc
+            WHERE mc.id = #{id}
+        )
+        UPDATE mission_completion AS mc
+        SET end_lat        = #{endLat}::float8,
+         end_lng        = #{endLng}::float8,
+            end_at         = calc.e_at,
+            distance_km    = calc.dist_km,
+            duration_hours = GREATEST(EXTRACT(EPOCH FROM (calc.e_at - mc.start_at))/3600.0, 0),
+            avg_speed_kmh  = CASE
+            WHEN EXTRACT(EPOCH FROM (calc.e_at - mc.start_at)) > 0
+            THEN calc.dist_km / (EXTRACT(EPOCH FROM (calc.e_at - mc.start_at))/3600.0)
+            ELSE NULL
+        END,
+         detected_mode  = CASE
+                            WHEN (CASE WHEN EXTRACT(EPOCH FROM (calc.e_at - mc.start_at)) > 0
+                                       THEN calc.dist_km / (EXTRACT(EPOCH FROM (calc.e_at - mc.start_at))/3600.0)
+                                       ELSE NULL END) <= 20 THEN 'BIKE'
+                            WHEN (CASE WHEN EXTRACT(EPOCH FROM (calc.e_at - mc.start_at)) > 0
+                                       THEN calc.dist_km / (EXTRACT(EPOCH FROM (calc.e_at - mc.start_at))/3600.0)
+                                       ELSE NULL END) <= 40 THEN 'TRANSIT'
+                            ELSE 'CAR'
+        END,
+         status         = 'COMPLETED'  -- 제약 허용값으로
+    FROM calc
+   WHERE mc.id = #{id}
+        AND mc.end_at IS NULL            -- 진행중 제한(원하면 빼세요)
+        RETURNING mc.id, mc.user_id, mc.template_id, mc.status,
+        mc.awarded_points, mc.proof_image_url, mc.proof_note, mc.created_at
+        ]]>
+    </select>
+
+
+
+    <!-- 3) 자동 판정 및 포인트 지급 (템플릿의 기대모드와 일치 시 성공) -->
+    <select id="verifyAndAwardPoints" parameterType="map" resultType="map">
+        UPDATE mission_completion AS mc
+        SET status = CASE WHEN mt.algo_expected = mc.detected_mode
+                              THEN 'SUCCESS' ELSE 'FAILED' END,
+            awarded_points = CASE WHEN mt.algo_expected = mc.detected_mode
+                                      THEN mt.points ELSE 0 END
+            FROM mission_template mt
+        WHERE mc.id = #{id}
+          AND mc.template_id = mt.id
+            RETURNING mc.status, mc.awarded_points, mc.detected_mode, mt.algo_expected;
+    </select>
+
+    <!-- 카드 목록: completion + template JOIN → MissionCardDTO 로 딱 맞게 -->
+    <select id="listMissionCards" parameterType="map" resultMap="MissionCardDTOMap">
+        SELECT
+            mc.id                 AS assignment_id,
+            mc.template_id        AS template_id,
+            mc.status             AS status,
+            mc.awarded_points     AS awarded_points,
+            mt.code               AS code,
+            mt.title              AS title,
+            mt.verify_type        AS verify_type,
+            mt.algo_key           AS algo_key,
+            mt.algo_expected      AS algo_expected,
+            mt.points             AS points
+        FROM mission_completion mc
+                 JOIN mission_template  mt ON mt.id = mc.template_id
+        WHERE mc.user_id = #{userId}
+        ORDER BY mc.id DESC
+            LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 단건 조회 (MissionDTO) -->
+    <select id="getMissionById" parameterType="long" resultMap="MissionDTOMap">
+        SELECT id, user_id, template_id, status,
+               awarded_points, proof_image_url, proof_note, created_at
+        FROM mission_completion
+        WHERE id = #{id}
+    </select>
+
+    <!---->
 </mapper>

@@ -3,8 +3,7 @@ package kopo.poly.dto;
 import lombok.*;
 
 import java.time.LocalDateTime;
-
-
+import java.time.OffsetDateTime;
 
 
 @Getter @Setter
@@ -19,5 +18,15 @@ public class MissionDTO {
     private Integer awardedPoints;   // int4 → Integer
     private String proofImageUrl;
     private String proofNote;
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
+    private Double startLat;
+    private Double startLng;
+    private LocalDateTime startAt;
+    private Double endLat;
+    private Double endLng;
+    private LocalDateTime endAt;
+    private Double distanceKm;
+    private Double durationHours;
+    private Double avgSpeedKmh;
+    private String detectedMode;
 }

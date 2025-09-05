@@ -94,6 +94,25 @@ function openMissionModal(cardEl, meta, points){
     mTitle.textContent = current.title;
     mMeta.innerHTML = `<span class="meta">${meta.tag}</span> <span class="badge" style="margin-left:8px">+ ${current.points}p</span>`;
     mDesc.textContent = (META[current.code]?.desc) || meta.desc;
+
+
+
+
+    if (current.verifyType !== 'photo') {
+        const activeId = getActiveAssignment(current.templateId);
+        btnStart.textContent = activeId ? '인증하기' : '도전하기';
+        } else {
+        btnStart.textContent = '인증 사진 올리기';
+        }
+
+
+
+
+
+
+
+
+
     missionModal.classList.add('open'); lockScroll(true);
 }
 function closeMissionModal(){ missionModal.classList.remove('open'); lockScroll(false); }
@@ -117,32 +136,121 @@ uFile.addEventListener('change', ()=>{
     document.getElementById('uPreview').style.display = 'block';
 });
 
+
+
+
+
+
+
+
+
+
+
+// // 시작(도전하기/인증하기)
+// btnStart.addEventListener('click', ()=>{
+//     if (!current) return;
+//
+//     const missionName = current.title;   // ← 여기서 잡음
+//     console.log('missionName:', missionName);
+//
+//
+//     closeMissionModal();
+//     if(!current) return;
+//
+//     if(current.verifyType === 'photo'){
+//         openUpload();
+//     } else {
+//         // ⚠️ 임시: 서버 템플릿의 기대값(algoExpected)을 보냄
+//         // 실제 배포에서는 앱/센서에서 계산한 결과 문자열로 바꿔 전송하세요.
+//         const result = current.algoExpected || '';
+//         fetch(`/missions/${current.templateId}/verify-algo?result=${encodeURIComponent(result)}`, { method:'POST' })
+//             .then(r=>r.json())
+//             .then(j=>{
+//                 if(j.ok){ markDone(current.assignmentId); alert('미션 완료!'); }
+//                 else alert(j.msg || '조건을 충족하지 못했습니다.');
+//             })
+//             .catch(()=>alert('처리 중 오류'));
+//     }
+// });
+
+
+
+
+
 // 시작(도전하기/인증하기)
-btnStart.addEventListener('click', ()=>{
-    if (!current) return;
+    btnStart.addEventListener('click', async ()=>{
+        if (!current) return;
+        const isPhoto = current.verifyType === 'photo';
+        if (isPhoto) {
+            closeMissionModal();
+            openUpload();
+            return;
+            }
+// === 알고리즘 미션 ===
+        const templateId = current.templateId;
+        const headers = csrfHeaders();
+        btnStart.disabled = true;
+        const originalLabel = btnStart.textContent;
+        try {
+            const activeId = getActiveAssignment(templateId);
+            if (!activeId) {
+                // ---- 도전하기: 시작 좌표/시간 저장 ----
 
-    const missionName = current.title;   // ← 여기서 잡음
-    console.log('missionName:', missionName);
+
+                if (LAT == null || LON == null) throw new Error('위치가 아직 확보되지 않았습니다.');
+                btnStart.textContent = '위치 확인 중…';
+                const at = new Date(LAST_TS || Date.now()).toISOString();
+                const { assignmentId } = await postForm('/personal/start',
+                    { templateId, lat: LAT, lng: LON, at }, headers);
 
 
-    closeMissionModal();
-    if(!current) return;
+                setActiveAssignment(templateId, assignmentId);
+                btnStart.textContent = '인증하기';
+                alert('미션 시작! 목적지에 도착하면 인증하기를 눌러주세요.');
+                    } else {
+                btnStart.textContent = '검증 중…';
+                      if (LAT == null || LON == null) throw new Error('위치가 아직 확보되지 않았습니다.');
+                      const at = new Date(LAST_TS || Date.now()).toISOString();
+                      const dto = await postForm('/personal/complete',
+                            { assignmentId: activeId, lat: LAT, lng: LON, at, autoVerify: true }, headers)
 
-    if(current.verifyType === 'photo'){
-        openUpload();
-    } else {
-        // ⚠️ 임시: 서버 템플릿의 기대값(algoExpected)을 보냄
-        // 실제 배포에서는 앱/센서에서 계산한 결과 문자열로 바꿔 전송하세요.
-        const result = current.algoExpected || '';
-        fetch(`/missions/${current.templateId}/verify-algo?result=${encodeURIComponent(result)}`, { method:'POST' })
-            .then(r=>r.json())
-            .then(j=>{
-                if(j.ok){ markDone(current.assignmentId); alert('미션 완료!'); }
-                else alert(j.msg || '조건을 충족하지 못했습니다.');
-            })
-            .catch(()=>alert('처리 중 오류'));
-    }
-});
+
+
+                      // ---- 인증하기: 종료 좌표/시간 저장 + 자동 판정 ----
+                      setActiveAssignment(templateId, null);
+                      btnStart.textContent = '도전하기';
+
+                         // 완료 UI 반영 (서버가 반환한 status/points 사용)
+                              if (dto?.status) {
+                            // grid 내 해당 카드 찾기 (assignmentId가 없다면 templateId로 대체)
+                                const card = grid.querySelector(`.mission-card[data-template-id="${templateId}"]`);
+                            if (dto.status.toUpperCase() === 'SUCCESS') {
+                                  if (card) markDone(card.dataset.assignmentId || activeId);
+                                  alert(`성공! +${dto.awardedPoints ?? 0}p 적립`);
+                                } else {
+                                  alert('아쉽지만 실패 😢');
+                                }
+                          } else {
+                            alert('검증 결과를 받지 못했습니다.');
+                          }
+                      closeMissionModal();
+                    }
+              } catch (e) {
+                console.error(e);
+                alert(e.message || '처리 중 오류');
+              } finally {
+                btnStart.disabled = false;
+                // 모달을 닫지 않았다면 원래 라벨 복구
+                    if (missionModal.classList.contains('open')) btnStart.textContent = originalLabel;
+              }
+        });
+
+
+
+
+
+
+
 
 // 사진 업로드 제출
 uSubmit.addEventListener('click', async ()=>{
@@ -150,6 +258,7 @@ uSubmit.addEventListener('click', async ()=>{
 
     const templateId = current.templateId;            // ← 여기서 확보
     const missionName = current.title;
+    const points = current.points;
 
     const f = uFile.files?.[0];
     if (!f) { alert('사진을 업로드하세요.'); return; }
@@ -160,6 +269,7 @@ uSubmit.addEventListener('click', async ()=>{
 
     const fd = new FormData();
     fd.append('image', f);
+    fd.append('awardedPoints', points);
     fd.append('proof_note', uMemo.value || '');
     fd.append('title', missionName);
     fd.append('templateId', String(templateId));      // ← 같이 전송(문자열로)
@@ -184,7 +294,17 @@ uSubmit.addEventListener('click', async ()=>{
 
 // 완료 UI 반영
 function markDone(assignmentId){
-    const card = grid.querySelector(`.mission-card[data-assignment-id="${assignmentId}"]`);
+    // const card = grid.querySelector(`.mission-card[data-assignment-id="${assignmentId}"]`);
+
+      let card = assignmentId ? grid.querySelector(`.mission-card[data-assignment-id="${assignmentId}"]`) : null;
+      if (!card && current?.templateId) {
+            card = grid.querySelector(`.mission-card[data-template-id="${current.templateId}"]`);
+          }
+
+
+
+
+
     if(!card) return;
     card.classList.add('is-done');
     card.setAttribute('aria-disabled','true');
@@ -204,4 +324,92 @@ function markDone(assignmentId){
 
 
 
+
+
+
+
+// === [ADD] 공통 유틸 ===
+async function postForm(url, bodyObj, headers = {}) {
+    const body = new URLSearchParams(bodyObj);
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', ...headers },
+        body
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const ct = res.headers.get('content-type') || '';
+    return ct.includes('application/json') ? res.json() : res.text();
+}
+
+// 브라우저 위치 얻기 (소수점 6자리)
+function geolocate(opts={ enableHighAccuracy:true, timeout:12000, maximumAge:0 }) {
+    return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) return reject(new Error('이 브라우저는 위치를 지원하지 않음'));
+        navigator.geolocation.getCurrentPosition(
+            pos => resolve({
+                lat:+pos.coords.latitude.toFixed(6),
+                lng:+pos.coords.longitude.toFixed(6),
+                at: new Date().toISOString()
+            }),
+            err => reject(err),
+            opts
+        );
+    });
+}
+
+// 템플릿별 진행중 assignmentId 저장/조회 (도전하기→인증하기 토글용)
+const assignKey = (templateId) => `mc_active_${templateId}`;
+const getActiveAssignment = (templateId) => {
+    const v = localStorage.getItem(assignKey(templateId));
+    return v ? Number(v) : null;
+};
+const setActiveAssignment = (templateId, idOrNull) => {
+    if (idOrNull) localStorage.setItem(assignKey(templateId), String(idOrNull));
+    else localStorage.removeItem(assignKey(templateId));
+};
+
+// (선택) CSRF 사용 시 헤더 주입
+function csrfHeaders() {
+    const h = {};
+    const k = document.querySelector('meta[name="_csrf_header"]')?.content;
+    const v = document.querySelector('meta[name="_csrf"]')?.content;
+    if (k && v) h[k] = v;
+    return h;
+}
+
+
+
+
+
+
+
+/**/
+
+// ===== 전역 위치 변수 =====
+let LAT = null;
+let LON = null;
+let LAST_TS = null;
+
+function geoSuccess({ coords, timestamp }) {
+    LAT = coords.latitude;
+    LON = coords.longitude;
+    LAST_TS = timestamp;
+    console.log('업데이트:', LAT, LON, 'ts=', LAST_TS);
+}
+
+function geoError(err) {
+    console.warn('위치 에러:', err);
+}
+
+
+// 페이지 시작할 때 실행 → 실시간 위치 업데이트
+if (navigator.geolocation) {
+    navigator.geolocation.watchPosition(geoSuccess, geoError, {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+    });
+} else {
+    console.warn('이 브라우저는 geolocation을 지원하지 않음');
+}
 
