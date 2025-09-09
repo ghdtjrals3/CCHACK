@@ -9,19 +9,17 @@
     <title>춘천시 생활쓰레기 안내</title>
 
     <!-- 공통 네비게이션 CSS -->
-    <link rel="stylesheet" th:href="@{../nav.css}" />
-    <!-- 페이지 전용 CSS -->
-    <link rel="stylesheet" th:href="@{/info/guide.css}" />
+      <link rel="stylesheet" th:href="@{../nav.css}" />
+      <!-- 페이지 전용 스타일 -->
+      <link rel="stylesheet" th:href="@{/home/home.css}" />
+      <link rel="stylesheet" th:href="@{/info/guide.css}" />
   </head>
   <body>
     <!-- 상단 네비게이션 -->
     <header class="site-header">
       <div class="inner">
-        <a class="brand" href="http://localhost:11000/">동구라미 온</a>
+        <a class="brand" href="http://localhost:11000/">춘천지켜봄</a>
         <nav class="nav-links">
-          <a class="nav-link" data-route="/" href="http://localhost:11000/"
-            >홈</a
-          >
           <a
             class="nav-link"
             data-route="/trash/reportPage"
@@ -224,14 +222,6 @@
     <!-- 모바일 하단 탭바 -->
     <nav class="bottom-nav" aria-label="하단탭">
       <div class="bn-inner">
-        <a
-          class="bn-item"
-          data-route="/"
-          href="http://localhost:11000/"
-          aria-label="홈"
-        >
-          <span class="ic">🏠</span><span>홈</span>
-        </a>
         <a
           class="bn-item"
           data-route="/trash/reportPage"

@@ -95,7 +95,27 @@ public class PersonalController {
             @RequestParam(required=false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             OffsetDateTime at) {
 
+        log.info(this.getClass().getName() + " psernal controller start Start !!");
+
         String userId = currentUser(session);
+
+        log.info(userId);
+        log.info(String.valueOf(lat));
+        log.info(String.valueOf(lng));
+        log.info(templateId.toString());
+
+
+        // ======================================================
+        // 더미 데이터
+        // CASE 1
+        // 입력값 : start_lat = 37.47676 /start_lng = 126.95961 / start_at = 2025-09-05 15:00:00
+        // 예상값 : distance_km ≈ 0 / duration_hours ≈ 0.033 / avg_speed_kmh ≈ 0 / detected_mode = 'STAY' or 'INVALID'
+
+        lat = 37.47676;
+        lng =  126.95961;
+        at = OffsetDateTime.parse("2025-09-05T15:00:00+09:00");
+        // ======================================================
+
         Long assignmentId = personalService.start(userId, templateId, lat, lng, at);
         return ResponseEntity.ok(Map.of("assignmentId", assignmentId));
     }
@@ -112,6 +132,19 @@ public class PersonalController {
             @RequestParam(defaultValue = "true") boolean autoVerify) {
 
         String userId = currentUser(session);
+
+        // ======================================================
+        // 더미 데이터
+        // CASE 1
+
+        lat = 37.47676;
+        lng =  126.95961;
+        at = OffsetDateTime.parse("2025-09-05T15:00:00+09:00");
+        // ======================================================
+
+
+
+
         MissionDTO dto = personalService.complete(userId, assignmentId, lat, lng, at, autoVerify);
         return ResponseEntity.ok(dto);
     }

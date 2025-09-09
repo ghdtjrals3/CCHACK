@@ -292,36 +292,28 @@ uSubmit.addEventListener('click', async ()=>{
     }
 });
 
-// 완료 UI 반영
 function markDone(assignmentId){
-    // const card = grid.querySelector(`.mission-card[data-assignment-id="${assignmentId}"]`);
-
-      let card = assignmentId ? grid.querySelector(`.mission-card[data-assignment-id="${assignmentId}"]`) : null;
-      if (!card && current?.templateId) {
-            card = grid.querySelector(`.mission-card[data-template-id="${current.templateId}"]`);
-          }
-
-
-
-
-
+    let card = assignmentId ? grid.querySelector(`.mission-card[data-assignment-id="${assignmentId}"]`) : null;
+    if (!card && current?.templateId) {
+        card = grid.querySelector(`.mission-card[data-template-id="${current.templateId}"]`);
+    }
     if(!card) return;
+
     card.classList.add('is-done');
     card.setAttribute('aria-disabled','true');
     card.tabIndex = -1;
     card.title = '이미 완료된 미션입니다';
 
     const foot = card.querySelector('.foot');
-    foot.querySelector('.meta').textContent = '완료';
-    const badge = foot.querySelector('.badge');
-    if (badge) { badge.classList.add('done'); badge.textContent = '해결완료'; }
-    if (!card.querySelector('.done-overlay')) {
-        card.insertAdjacentHTML('beforeend', `<div class="done-overlay" aria-hidden="true">✅ 해결완료</div>`);
+    if (foot){
+        foot.querySelector('.meta').textContent = '완료';
+        const badge = foot.querySelector('.badge');
+        if (badge) { badge.classList.add('done'); badge.textContent = '해결완료'; }
     }
+
+    // ⛔ 이 부분(도장 DOM 삽입)은 삭제합니다.
+    // if (!card.querySelector('.stamp')) { ... }
 }
-
-
-
 
 
 
@@ -413,3 +405,9 @@ if (navigator.geolocation) {
     console.warn('이 브라우저는 geolocation을 지원하지 않음');
 }
 
+function clearAllActiveAssignments(){
+    for (const m of MISSIONS) setActiveAssignment(m.templateId, null);
+}
+// 초기 한번만 호출
+clearAllActiveAssignments();
+render();

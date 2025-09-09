@@ -137,3 +137,66 @@ textarea{
     background: linear-gradient( to bottom right, rgba(255,255,255,.82), rgba(255,255,255,.55) );
     border-radius: inherit;
 }
+
+
+
+
+
+
+
+/* 카드 기준 좌표계 */
+.mission-card { position: relative; overflow: hidden; }
+
+/* 기존 opacity로 카드 전체를 낮추는 규칙이 있다면 지우고,
+   대신 반투명 오버레이로 흐리게 처리 (도장보다 아래 z-index) */
+.mission-card.is-done::before{
+    content:"";
+    position:absolute; inset:0;
+    background:#fff;
+    opacity:.55;                 /* 흐림 정도 */
+    z-index: 10;
+    pointer-events:none;
+    /* 선택: 살짝 그레인/점선 효과 원하면 배경이미지 추가 가능 */
+}
+
+/* 도장: 최상단으로 */
+.mission-card.is-done::after{
+    content:"해결완료";
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    z-index: 20;                  /* before(10)보다 위 */
+    pointer-events:none;
+
+    font-weight:900;
+    letter-spacing:.18em;
+    /* 한국어라 대문자 변환 불필요: text-transform 제거 */
+    color:#2e7d32;                /* 빨강 원하면 #d61f1f */
+    border:4px solid currentColor;
+    border-radius:9999px;
+    padding:12px 24px;
+    width: fit-content; height: fit-content; margin:auto;
+    transform: rotate(-12deg);
+    background: rgba(255,255,255,.65);
+    mix-blend-mode:multiply;
+    box-shadow:
+            0 0 0 2px rgba(255,255,255,.9) inset,
+            0 10px 24px rgba(0,0,0,.18);
+    animation: stamp-in .45s cubic-bezier(.2,.7,.2,1) both;
+}
+
+/* 이미지만 살짝 desaturate */
+.mission-card.is-done img,
+.mission-card.is-done .thumb { filter: grayscale(.15) saturate(.8); }
+
+/* 애니메이션 */
+@keyframes stamp-in{
+    0%   { transform: scale(1.8) rotate(-12deg); opacity:0; }
+    70%  { transform: scale(.96) rotate(-12deg); opacity:1; }
+    100% { transform: scale(1)   rotate(-12deg); }
+}
+
+/* 모서리 버전 원하면 아래만 적용
+.mission-card.is-done::after{
+  inset:auto; top:10px; right:10px; margin:0; transform: rotate(-18deg);
+}
+*/

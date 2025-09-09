@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>동구라미 온 • 앱/웹 반응형</title>
+  <title>춘천지켜봄 온 • 앱/웹 반응형</title>
 
   <!-- 공통 네비게이션 -->
   <link rel="stylesheet" th:href="@{../nav.css}" />
@@ -15,10 +15,9 @@
   <!-- 상단 공통 네비 (nav.css 사용) -->
   <header class="site-header" role="banner">
     <div class="inner">
-      <a class="brand" href="http://localhost:11000/" aria-label="홈으로">동구라미 온</a>
+      <a class="brand" href="http://localhost:11000/" aria-label="홈으로">춘천지켜봄</a>
 
       <nav class="nav-links" aria-label="주요 메뉴">
-        <a class="nav-link" href="http://localhost:11000/">홈</a>
         <a class="nav-link" href="http://localhost:11000/trash/reportPage">지도</a>
         <a class="nav-link" href="http://localhost:11000/personal/mission">참여</a>
         <a class="nav-link" href="http://localhost:11000/center">센터</a>
@@ -44,7 +43,7 @@
       <!-- 홈 전용 상단 툴바(페이지 내부 요소) -->
       <div class="appbar">
         <div class="row">
-          <div class="brand"><a href="http://localhost:11000/">동구라미 온</a></div>
+          <div class="brand"><a href="http://localhost:11000/">환경지켜봄</a></div>
           <div class="menu">
             <a href="http://localhost:11000/trash/reportPage">지도</a>
             <a href="http://localhost:11000/personal/mission">참여</a>
@@ -101,15 +100,15 @@
           <div class="card-h">
             <div class="icon">🏪</div>
             <div class="meta">
-              <div class="title">동구라미가게</div>
-              <div class="muted">친환경자원순환센터, 동구문화센터</div>
+              <div class="title">환경지켜봄가게</div>
+              <div class="muted">춘천자원순환센터</div>
             </div>
             <a class="right-link" href="#">더보기 ›</a>
           </div>
         </article>
 
         <article class="info">
-          <div class="loc">광주 동구 필문대로 159번길 17</div>
+          <div class="loc">강원 춘천시</div>
           <div class="cols">
             <div><div class="k">종량제</div><div class="v">-</div></div>
             <div><div class="k">재활용</div><div class="v">-</div></div>
@@ -121,14 +120,12 @@
         <div class="banners">
           <div class="banner"><h4>탑밥 프로그램</h4><p>지구시민을 위한 탄소저감 프로그램!</p></div>
           <div class="banner"><h4>다회용기 대여</h4><p>일회용 대신 다회용!</p></div>
-          <div class="banner"><h4>동구라미온 2.0 출시</h4><p>앱으로 더 간편하게!</p></div>
         </div>
 
         <div class="section-title">공지사항</div>
         <article class="card">
           <div class="tile-row">다회용기 대여 역사 종합 안내 (10.1~10.24)</div>
           <div class="tile-row">재활용동네마당 지도 · 우유팩 수거기 안내</div>
-          <div class="tile-row">최신 이슈 동구리미 2.0 앱 홍보 중</div>
         </article>
 
         <div class="section-title">센터소식</div>
@@ -144,7 +141,7 @@
   <!-- =================== 웹 모드 (넓은 창) =================== -->
   <section class="web-mode">
     <section class="hero">
-      <h1>광주 동구처럼, ‘동구라미 온’!</h1>
+      <h1>나도 ‘환경지켜봄’!</h1>
       <p>탄소중립 생활실천은 나부터 먼저</p>
     </section>
 
@@ -156,12 +153,12 @@
         </div>
         <div class="wcard"><strong>쓰레기 신고 · 해결</strong><br/><span class="muted" th:text="|${size ?: 0}건이 기다리고 있어요.|">0건이 기다리고 있어요.</span></div>
         <div class="wcard"><strong>스마트 배출함</strong><br/><span class="muted">우유팩 수거기 · 01번 배출함</span></div>
-        <div class="wcard"><strong>동구라미가게</strong><br/><span class="muted">친환경자원순환센터, 동구문화센터</span></div>
+        <div class="wcard"><strong>춘천지켜봄가게</strong><br/><span class="muted">친환경자원순환센터, 춘천문화센터</span></div>
       </div>
 
       <div class="info-wide">
         <strong>청소차 도착정보</strong>
-        <div class="muted">광주 동구 필문대로 159번길 17</div>
+        <div class="muted">강원 춘천</div>
         <div class="cols">
           <div><div class="k">종량제</div><div class="v">-</div></div>
           <div><div class="k">재활용</div><div class="v">-</div></div>
@@ -173,7 +170,6 @@
       <div class="web-banners">
         <div class="web-banner"><strong>탑밥 프로그램</strong><p class="muted">지구시민을 위한 탄소저감 프로그램!</p></div>
         <div class="web-banner"><strong>다회용기 대여</strong><p class="muted">일회용 대신 다회용!</p></div>
-        <div class="web-banner"><strong>동구라미온 2.0 출시</strong><p class="muted">앱으로 더 간편하게!</p></div>
       </div>
 
       <div class="web-sect">
@@ -181,7 +177,6 @@
         <div class="list">
           <div class="item">다회용기 대여 역사 종합 안내 (10.1~10.24)</div>
           <div class="item">재활용동네마당 지도 · 우유팩 수거기 안내</div>
-          <div class="item">최신 이슈 동구리미 2.0 앱 홍보 중</div>
         </div>
       </div>
 
@@ -199,7 +194,6 @@
   <!-- 모바일 하단 공통 네비 (nav.css 사용) -->
   <nav class="bottom-nav" aria-label="하단탭">
     <div class="bn-inner">
-      <a class="bn-item" href="http://localhost:11000/"><span class="ic" aria-hidden="true">🏠</span><span>홈</span></a>
       <a class="bn-item" href="http://localhost:11000/trash/reportPage"><span class="ic" aria-hidden="true">🗺️</span><span>지도</span></a>
       <a class="bn-item" href="http://localhost:11000/personal/mission"><span class="ic" aria-hidden="true">🤝</span><span>참여</span></a>
       <a class="bn-item" href="http://localhost:11000/center"><span class="ic" aria-hidden="true">🏢</span><span>센터</span></a>

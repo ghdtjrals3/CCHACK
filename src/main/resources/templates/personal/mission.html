@@ -7,52 +7,85 @@
     <link rel="stylesheet" th:href="@{/personal/mission.css}" />
 </head>
 <body>
-  <div class="safe"></div>
-  <header>
-    <nav class="nav-top">
-      <div class="brand">동구라미 온</div>
-      <div class="spacer"></div>
-      <div class="tabs">
-        <a href="#" class="active">미션</a>
-        <a href="#">지도</a>
-        <a href="#">참여</a>
-        <a href="#">센터</a>
-        <a href="#">정보</a>
-      </div>
-    </nav>
-  </header>
 
-  <script th:inline="javascript">
-      window.MISSIONS = /*[[${missions}]]*/ [];
-  </script>
+<link rel="stylesheet" th:href="@{/nav.css}" />
+<link rel="stylesheet" th:href="@{/home/home.css}" />
 
-  <div class="title-wrap">
-    <h1>보너스 포인트 받는<br/>미션 모아봤어요</h1>
-    <p class="subtitle">탄소중립 실천으로 포인트를 모아봐요</p>
-  </div>
 
-  <main class="grid" id="grid"></main>
 
-    <!-- 하단 탭: nav.css의 .bottom-nav 구조로 정리 -->
-    <nav class="bottom-nav" aria-label="하단탭">
-      <div class="bn-inner">
-        <a class="bn-item" href="http://localhost:11000/"
-          ><span class="ic" aria-hidden="true">🏠</span><span>홈</span></a
-        >
-        <a class="bn-item" href="http://localhost:11000/trash/reportPage"
-          ><span class="ic" aria-hidden="true">🗺️</span><span>지도</span></a
-        >
-        <a class="bn-item" href="http://localhost:11000/personal/mission"
-          ><span class="ic" aria-hidden="true">🤝</span><span>참여</span></a
-        >
-        <a class="bn-item" href="http://localhost:11000/center"
-          ><span class="ic" aria-hidden="true">🏢</span><span>센터</span></a
-        >
-        <a class="bn-item" href="http://localhost:11000/info/guide"
-          ><span class="ic" aria-hidden="true">ℹ️</span><span>정보</span></a
-        >
-      </div>
-    </nav>
+<header class="site-header">
+    <div class="inner">
+        <!-- 좌: 브랜드 -->
+        <a class="brand" href="/user">춘천지켜봄</a>
+
+        <!-- 가운데: 메뉴 -->
+        <nav class="nav-links">
+            <a class="nav-link" href="/trash/reportPage"
+               th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.matches('.*/trash/reportPage.*')} ? ' active' : ''">
+                지도
+            </a>
+            <a class="nav-link" href="/personal/missionPage"
+               th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.matches('.*/personal/.*')} ? ' active' : ''">
+                참여
+            </a>
+            <a class="nav-link" href="/center"
+               th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.matches('.*/center.*')} ? ' active' : ''">
+                센터
+            </a>
+            <a class="nav-link" href="/info"
+               th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.matches('.*/info.*')} ? ' active' : ''">
+                정보
+            </a>
+        </nav>
+
+        <!-- 우: 로그인/사용자 -->
+        <div class="auth">
+            <!-- 로그인 전 -->
+            <a class="btn" th:if="${#strings.isEmpty(session.user_id)}" th:href="@{/user/login}">로그인</a>
+
+            <!-- 로그인 후 -->
+            <div th:unless="${#strings.isEmpty(session.user_id)}" style="display:flex; gap:8px;">
+                <a class="btn" th:href="@{/user/myPage}">내 정보</a>
+                <a class="btn primary" th:href="@{/user/logOut}">로그아웃</a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- (옵션) 모바일 하단 네비 -->
+<nav class="bottom-nav" aria-label="하단 네비게이션">
+    <div class="bn-inner">
+        <a class="bn-item" href="/trash/reportPage">
+            <span class="ic">🗺️</span><span>지도</span>
+        </a>
+        <a class="bn-item" href="/personal/missionPage">
+            <span class="ic">🤝</span><span>참여</span>
+        </a>
+        <a class="bn-item" href="/center">
+            <span class="ic">🏛️</span><span>센터</span>
+        </a>
+        <a class="bn-item" th:href="${#strings.isEmpty(session.user_id)} ? @{/user/login} : @{/user/myPage}">
+            <span class="ic">ℹ️</span>
+            <span th:text="${#strings.isEmpty(session.user_id)} ? '로그인' : '정보'">정보</span>
+        </a>
+    </div>
+</nav>
+
+
+<div class="safe"></div>
+
+
+<script th:inline="javascript">
+  window.MISSIONS = /*[[${missions}]]*/ [];
+</script>
+
+<div class="title-wrap">
+<h1>보너스 포인트 받는<br/>미션 모아봤어요</h1>
+<p class="subtitle">탄소중립 실천으로 포인트를 모아봐요</p>
+</div>
+
+<main class="grid" id="grid"></main>
+
 
     <!-- 미션 상세 모달 -->
     <div class="modal" id="missionModal">

@@ -73,8 +73,7 @@
         UPDATE mission_completion mc
         SET start_lat = #{startLat},
             start_lng = #{startLng},
-            start_at  = #{startAt}::timestamptz,
-         updated_at = now()
+            start_at  = #{startAt}::timestamptz
         WHERE mc.user_id = #{userId}
           AND mc.template_id = #{templateId}
           AND mc.status <> 'completed'
@@ -116,43 +115,44 @@
         <![CDATA[
         WITH calc AS (
             SELECT
-                COALESCE(#{endAt}::timestamptz, now()) AS e_at,
+                COALESCE(#{endAt}::timestamptz, now())           AS e_at,
                 2 * 6371 * ASIN(
                         SQRT(
-                                POWER(SIN(RADIANS((#{endLat} - mc.start_lat) / 2.0)), 2) +
+                                POWER(SIN(RADIANS((#{endLat} - mc.start_lat)/2.0)), 2) +
                                 COS(RADIANS(mc.start_lat)) * COS(RADIANS(#{endLat})) *
-                                POWER(SIN(RADIANS((#{endLng} - mc.start_lng) / 2.0)), 2)
+                                POWER(SIN(RADIANS((#{endLng} - mc.start_lng)/2.0)), 2)
                         )
-                           ) AS dist_km
+                           )                                                AS dist_km,
+                EXTRACT(EPOCH FROM (COALESCE(#{endAt}::timestamptz, now()) - mc.start_at))/3600.0
+                    AS dur_h
             FROM mission_completion mc
             WHERE mc.id = #{id}
         )
         UPDATE mission_completion AS mc
-        SET end_lat        = #{endLat}::float8,
-         end_lng        = #{endLng}::float8,
+        SET
+            end_lat        = #{endLat}::float8,
+  end_lng        = #{endLng}::float8,
             end_at         = calc.e_at,
             distance_km    = calc.dist_km,
-            duration_hours = GREATEST(EXTRACT(EPOCH FROM (calc.e_at - mc.start_at))/3600.0, 0),
-            avg_speed_kmh  = CASE
-            WHEN EXTRACT(EPOCH FROM (calc.e_at - mc.start_at)) > 0
-            THEN calc.dist_km / (EXTRACT(EPOCH FROM (calc.e_at - mc.start_at))/3600.0)
-            ELSE NULL
+            duration_hours = GREATEST(calc.dur_h, 0),
+            avg_speed_kmh  = CASE WHEN calc.dur_h > 0 THEN calc.dist_km / calc.dur_h ELSE NULL END,
+  detected_mode  = CASE
+    -- ① 무효/정지 구간 먼저 처리 (임계값은 환경설정에 빼도 좋음)
+    WHEN calc.dur_h <= 0 OR calc.dist_km IS NULL THEN 'INVALID'
+    WHEN calc.dist_km < 0.05 THEN 'STAY'              -- 50 m 미만 이동
+    -- ② 평균속도 기반 판정 (NULL 방어)
+    WHEN calc.dur_h > 0 AND (calc.dist_km / calc.dur_h) <= 6   THEN 'WALK'
+    WHEN calc.dur_h > 0 AND (calc.dist_km / calc.dur_h) <= 20  THEN 'BIKE'
+    WHEN calc.dur_h > 0 AND (calc.dist_km / calc.dur_h) <= 40  THEN 'TRANSIT'
+    WHEN calc.dur_h > 0                                         THEN 'CAR'
+    ELSE 'UNKNOWN'
         END,
-         detected_mode  = CASE
-                            WHEN (CASE WHEN EXTRACT(EPOCH FROM (calc.e_at - mc.start_at)) > 0
-                                       THEN calc.dist_km / (EXTRACT(EPOCH FROM (calc.e_at - mc.start_at))/3600.0)
-                                       ELSE NULL END) <= 20 THEN 'BIKE'
-                            WHEN (CASE WHEN EXTRACT(EPOCH FROM (calc.e_at - mc.start_at)) > 0
-                                       THEN calc.dist_km / (EXTRACT(EPOCH FROM (calc.e_at - mc.start_at))/3600.0)
-                                       ELSE NULL END) <= 40 THEN 'TRANSIT'
-                            ELSE 'CAR'
-        END,
-         status         = 'COMPLETED'  -- 제약 허용값으로
-    FROM calc
-   WHERE mc.id = #{id}
-        AND mc.end_at IS NULL            -- 진행중 제한(원하면 빼세요)
+  status         = 'COMPLETED'
+FROM calc
+WHERE mc.id = #{id}
+        AND mc.end_at IS NULL
         RETURNING mc.id, mc.user_id, mc.template_id, mc.status,
-        mc.awarded_points, mc.proof_image_url, mc.proof_note, mc.created_at
+        mc.awarded_points, mc.proof_image_url, mc.proof_note, mc.created_at;
         ]]>
     </select>
 

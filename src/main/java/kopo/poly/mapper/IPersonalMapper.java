@@ -42,5 +42,5 @@ public interface IPersonalMapper {
 
     MissionDTO getMissionById(@Param("id") Long id);
 
-    int startTransport(String userId, Long templateId, double lat, double lng, OffsetDateTime startAt);
+    int startTransport(String userId, Long templateId, double startLat, double startLng, OffsetDateTime startAt);
 }
